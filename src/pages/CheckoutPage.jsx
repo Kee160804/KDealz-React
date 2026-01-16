@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CheckoutForm from '../components/CheckoutForm';
-import '../styles/Checkout.css';
+import '../styles/CheckOut.css';
 
 const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
   const [orderPlaced, setOrderPlaced] = useState(false);
