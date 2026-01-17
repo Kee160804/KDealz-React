@@ -9,25 +9,32 @@ const HomePage = ({ addToCart }) => {
 
   const slides = [
 
-    {
-      id: 49,
-      title: "Running Shoes Pro",
-      description: "Lightweight running shoes - $119.99",
-      price: 119.99,
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      category: "footwear"
-    },
-
-        {
+    // {
+    //   id: 49,
+    //   title: "Running Shoes Pro",
+    //   description: "Lightweight running shoes - $119.99",
+    //   price: 119.99,
+    //   image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    //   category: "footwear"
+    // },
+ {
       id: 1,
-      title: "Eternal Essence",
-      description: "Luxury Eau de Parfum - $89.99",
+      title: "EOS Products",
+      description: "EOS (Evolution of Smooth) is a beauty and skincare brand known for its brightly colored",
       price: 89.99,
-      image: "https://images.unsplash.com/photo-1541643600914-78b084683601?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      category: "perfume"
+      image: "https://evolutionofsmooth.com/cdn/shop/articles/Adobe_Express_-_file_-_2025-10-29T163614.508_0d060217-931e-4d27-9d0a-7d0269bc7825.jpg?crop=center&height=1000&v=1765212602&width=1000",
+      category: "beauty-bodycare"
+    },
+        {
+      id: 2,
+      title: "Dove Products",
+      description: "Dove products offer gentle, nourishing care for skin and hair",
+      price: 89.99,
+      image: "https://assets.unileversolutions.com/v1/143126630.jpg",
+      category: "beauty-bodycare"
     },
     {
-      id: 2,
+      id: 3,
       title: "Silk Touch Lotion",
       description: "Hydrating Body Cream - $34.99",
       price: 34.99,
@@ -35,7 +42,7 @@ const HomePage = ({ addToCart }) => {
       category: "skincare"
     },
     {
-      id: 3,
+      id: 4,
       title: "Velvet Rose",
       description: "Floral Perfume Collection - $79.99",
       price: 79.99,
