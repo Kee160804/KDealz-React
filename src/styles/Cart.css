@@ -283,3 +283,154 @@
     min-width: auto;
   }
 }
+
+
+
+
+/* Add these styles to your existing Cart.css */
+
+/* Size display styling */
+.item-size-display {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  padding: 6px 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+.size-label {
+  font-weight: bold;
+  color: #495057;
+  margin-right: 8px;
+}
+
+.size-value {
+  font-weight: 600;
+  color: #007bff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Item total section enhancements */
+.item-total-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.item-total {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #212529;
+}
+
+.item-quantity-info {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.item-size-info {
+  font-size: 0.85rem;
+  color: #007bff;
+  background-color: #e7f1ff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Make cart items more distinct */
+.cart-item {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.cart-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Quantity control styling */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qty-display {
+  min-width: 40px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Max quantity message */
+.max-quantity-message {
+  font-size: 0.85rem;
+  color: #dc3545;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* Remove button styling */
+.remove-item {
+  background-color: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+
+.remove-item:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Cart item image */
+.cart-item-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cart-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

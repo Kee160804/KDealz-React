@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import '../styles/ProductCard.css';
 
 const ProductsPage = ({ addToCart }) => {
   const [products, setProducts] = useState([
-
+    // Your entire products array here (keeping all your products as-is)
     // BEAUTY & BODY CARE 
-    // EOS BODY LOTION
-    {
+     {
       id: 1,
       name: "EOS Lotion (Vanilla)",
       description: "A rich blend of whipped vanilla, soft musk, and caramel creates a smooth, comforting scent that wraps skin in warmth. Sweet, creamy, and irresistible. ",
       price: 12.99,
       image: "https://evolutionofsmooth.com/cdn/shop/files/VanillaCashmereBL_2.jpg?v=1758024162&width=900",
-      stock: 45,
+      stock: 15,
       category: "beauty-bodycare",
       subCategory: "lotion",
       tags: ["eos", "body-wash", "lotion", "moisturizing", "shea-butter"]
@@ -466,11 +465,7 @@ const ProductsPage = ({ addToCart }) => {
     subCategory: "Men",
     tags: ["yze", "slides", "black", "summer", "casual"],
      sizes: ["6", "7", "8", "9", "10", "11"],
-    // sizes: ["S", "M", "L"],
-    availableSizes: {
-      // "S": 15,
-      // "M": 20,
-      // "L": 13
+    availableSizes: {   
        "6": 5,
       "7": 8,
       "8": 12,
@@ -524,22 +519,20 @@ const ProductsPage = ({ addToCart }) => {
   // APPAREL - Add size selection for clothing
   {
     id: 43,
-    name: "Nike Air Max Shoes",
-    description: "Latest Nike sneakers for sports and casual wear",
+    name: "Aeropostale 87 Graphic Tee",
+    description: "Recycled Polyester | Crafted from a mix of pre- and post-consumer waste to help reduce landfills, Jersey knit, Screenprinted & rubberized logo text with large 87 graphic, Style: 6376, Imported",
     price: 89.99,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&auto=format",
+    image: "https://www.aeropostale.com/dw/image/v2/BBSG_PRD/on/demandware.static/-/Sites-master-catalog-aeropostale/default/dw7130c1e8/60016376_007_main.jpg?sw=968&sh=1116&sm=fit&sfrm=jpg",
     stock: 30,
-    category: "footwear",
-    subCategory: "shoes",
-    tags: ["nike", "shoes", "sneakers", "sports", "kicks"],
-    sizes: ["7", "8", "9", "10", "11", "12"],
+    category: "apparel",
+    subCategory: "Men T's",
+    tags: ["old-navy", "slippers", "comfort"],
+    sizes: ["S", "M", "L", "XL"],
     availableSizes: {
-      "7": 3,
-      "8": 5,
-      "9": 8,
-      "10": 7,
-      "11": 5,
-      "12": 2
+      "S": 10,
+      "M": 12,
+      "L": 8,
+      "XL": 5
     }
   },
   {
@@ -550,7 +543,7 @@ const ProductsPage = ({ addToCart }) => {
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop&auto=format",
     stock: 65,
     category: "apparel",
-    subCategory: "t-shirts",
+    subCategory: "Women T's",
     tags: ["aero", "t-shirts", "cotton", "casual", "clothing"],
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     availableSizes: {
@@ -796,9 +789,7 @@ const ProductsPage = ({ addToCart }) => {
   subCategory: "gaming",
   tags: ["microsoft", "xbox", "gaming", "console", "4k"]
 }
-
-
-
+    // ... ALL YOUR OTHER PRODUCTS (keep them all as they are) ...
   ]);
 
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -848,18 +839,74 @@ const ProductsPage = ({ addToCart }) => {
     });
   };
 
-  // Updated add to cart function that also updates stock
-  const handleAddToCart = (product) => {
-    if (product.stock > 0) {
-      setProducts(prevProducts => 
-        prevProducts.map(p => 
-          p.id === product.id 
-            ? { ...p, stock: p.stock - 1 }
-            : p
-        )
-      );
-      addToCart(product);
+  // FIXED: handleAddToCart function with proper quantity handling
+  const handleAddToCart = (product, quantity = 1, selectedSize = null) => {
+    console.log('ProductsPage - Adding to cart:', {
+      product: product.name,
+      quantity: quantity,
+      selectedSize: selectedSize
+    });
+
+    // Check if size is required for footwear/apparel and selected
+    if ((product.category === "footwear" || product.category === "apparel") && 
+        product.sizes && product.sizes.length > 0) {
+      if (!selectedSize) {
+        alert(`Please select a size for ${product.name}`);
+        return;
+      }
+      
+      // Check if selected size has enough stock for the quantity requested
+      if (product.availableSizes && product.availableSizes[selectedSize] < quantity) {
+        alert(`Only ${product.availableSizes[selectedSize]} available in size ${selectedSize}`);
+        return;
+      }
+    } else {
+      // For products without size selection, check overall stock
+      if (product.stock < quantity) {
+        alert(`Only ${product.stock} items available in stock`);
+        return;
+      }
     }
+
+    // Update products state with proper stock reduction using quantity
+    setProducts(prevProducts => 
+      prevProducts.map(p => {
+        if (p.id === product.id) {
+          // For products with sizes (footwear and apparel)
+          if ((product.category === "footwear" || product.category === "apparel") && 
+              selectedSize && p.availableSizes) {
+            return {
+              ...p,
+              availableSizes: {
+                ...p.availableSizes,
+                [selectedSize]: Math.max(0, p.availableSizes[selectedSize] - quantity)
+              },
+              stock: Math.max(0, p.stock - quantity)
+            };
+          } else {
+            // For products without size selection
+            return {
+              ...p,
+              stock: Math.max(0, p.stock - quantity)
+            };
+          }
+        }
+        return p;
+      })
+    );
+
+    // Add to cart with all necessary info - PASS THE QUANTITY CORRECTLY
+    addToCart({
+      ...product,
+      selectedSize: selectedSize || product.selectedSize,
+      quantity: quantity, // THIS IS THE KEY - Pass the actual quantity
+      // Ensure we have the updated stock info
+      stock: Math.max(0, product.stock - quantity),
+      availableSizes: product.availableSizes && selectedSize ? {
+        ...product.availableSizes,
+        [selectedSize]: Math.max(0, (product.availableSizes[selectedSize] || 0) - quantity)
+      } : product.availableSizes
+    });
   };
 
   const filteredProducts = products
@@ -891,7 +938,7 @@ const ProductsPage = ({ addToCart }) => {
     });
 
   // Reset sub-categories when category changes
-  React.useEffect(() => {
+  useEffect(() => {
     setSelectedSubCategories([]);
   }, [selectedCategory]);
 
@@ -976,7 +1023,7 @@ const ProductsPage = ({ addToCart }) => {
         </div>
       </div>
 
-      <div className="category-summary">
+      {/* <div className="category-summary">
         <p>
           {selectedCategory === 'all' 
             ? `Showing all ${filteredProducts.length} products` 
@@ -988,19 +1035,9 @@ const ProductsPage = ({ addToCart }) => {
             </span>
           )}
         </p>
-      </div>
-
-      {/* <div className="products-grid">
-        {filteredProducts.map(product => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            addToCart={() => handleAddToCart(product)}
-          />
-        ))}
       </div> */}
 
-            <div className="products-grid">
+      <div className="products-grid">
         {filteredProducts.map(product => (
           <ProductCard
             key={product.id}
