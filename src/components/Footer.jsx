@@ -44,9 +44,9 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Contact Info</h4>
           <ul>
-            <li>📧 orders@stylehub.com</li>
+            <li>📧 Email</li>
             <li>📱 +1-555-STYLE-88</li>
-            <li>📍 456 Fashion Ave, Style City</li>
+            <li>📍 Mckay Boulevard</li>
             <li>🕒 Mon-Fri: 9AM-8PM</li>
             <li>🕒 Sat-Sun: 10AM-6PM</li>
           </ul>
@@ -54,7 +54,7 @@ const Footer = () => {
       </div>
       
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} StyleHub. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} KaribbeanDealz. All rights reserved.</p>
         <p>Website for viewing and placing orders. Payment handled externally via WhatsApp.</p>
       </div>
     </footer>

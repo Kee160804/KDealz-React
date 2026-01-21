@@ -5,7 +5,9 @@ import '../styles/ProductCard.css';
 const ProductsPage = ({ addToCart }) => {
   const [products, setProducts] = useState([
     // Your entire products array here (keeping all your products as-is)
+
     // BEAUTY & BODY CARE 
+    // EOS Products 
      {
       id: 1,
       name: "EOS Lotion (Vanilla)",
@@ -163,6 +165,7 @@ const ProductsPage = ({ addToCart }) => {
       tags: ["eos", "body-wash", "moisturizing", "shea-butter"]
     },
     {
+      //EOS BODY OIL
       id: 15,
       name: "EOS Cashmere Body Oil (Vanilla Cashmere)",
       description: "A rich blend of whipped vanilla, soft musk, and caramel creates a smooth, comforting scent that melts into skin, leaving it soft and glowing.",
@@ -184,6 +187,8 @@ const ProductsPage = ({ addToCart }) => {
       subCategory: "body-butter",
       tags: ["eo", "body-butter", "whipped", "moisturizer", "cashmere"]
     },
+
+    //DOVE Crumbl
     {
       id: 17,
       name: "Dove Crumbl Confetti Cake (Body Wash)",
@@ -208,7 +213,7 @@ const ProductsPage = ({ addToCart }) => {
     },
 
      // BATHROOM ESSENTIALS 
-
+    // ANNA Brand Bathroom sets 
     {
       id: 19,
       name: "Anna 18 PC Embroidery Bath Set(Red)",
@@ -279,6 +284,8 @@ const ProductsPage = ({ addToCart }) => {
 
 
      // HOME & LIVING 
+
+     // Scented Candles 
     {
       id: 27,
       name: "Bath & Body Works(Covered in Roses) ",
@@ -346,6 +353,9 @@ const ProductsPage = ({ addToCart }) => {
       subCategory: "candles",
       tags: ["Bath & Body Works ","Scented candles", "scented", "aromatherapy", "relaxation", "home-decor"]
     },
+
+    
+    //BED SHEETS 
   {
       id: 33,
       name: "Traditonal at Home 6pc Queen Sheet Set  (Baby Blue) ",
@@ -425,12 +435,14 @@ const ProductsPage = ({ addToCart }) => {
     category: "footwear",
     subCategory: "Men",
     tags: ["old-navy", "slippers", "comfort"],
-    sizes: ["S", "M", "L", "XL"],
+    sizes: ["6", "7", "8", "9", "10", "11"],
     availableSizes: {
-      "S": 10,
-      "M": 12,
-      "L": 8,
-      "XL": 5
+      "6": 5,
+      "7": 8,
+      "8": 12,
+      "9": 10,
+      "10": 5,
+      "11": 2
     }
     },
 
@@ -538,12 +550,12 @@ const ProductsPage = ({ addToCart }) => {
   {
     id: 44,
     name: "Aero Pastel T-Shirts",
-    description: "Comfortable cotton t-shirts in pastel colors",
+    description: "Knit fabric, Tha Carter III album cover graphic, Style: 2137, Imported",
     price: 16.99,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop&auto=format",
+    image: "https://www.aeropostale.com/dw/image/v2/BBSG_PRD/on/demandware.static/-/Sites-master-catalog-aeropostale/default/dw745ff9b2/60182137_001_main.jpg?sw=968&sh=1116&sm=fit&sfrm=jpg",
     stock: 65,
     category: "apparel",
-    subCategory: "Women T's",
+    subCategory: "Men T's",
     tags: ["aero", "t-shirts", "cotton", "casual", "clothing"],
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     availableSizes: {
@@ -557,14 +569,14 @@ const ProductsPage = ({ addToCart }) => {
   },
   {
     id: 45,
-    name: "Men's Casual Button-Up Shirt",
+    name: "Aero Queens NY Appliqué Graphic Tee",
     description: "Classic button-up shirt for casual or business casual wear",
     price: 29.99,
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=500&fit=crop&auto=format",
+    image: "https://www.aeropostale.com/dw/image/v2/BBSG_PRD/on/demandware.static/-/Sites-master-catalog-aeropostale/default/dwab3ecca1/60055593_102_main.jpg?sw=968&sh=1116&sm=fit&sfrm=jpg",
     stock: 25,
     category: "apparel",
-    subCategory: "shirts",
-    tags: ["button-up", "casual", "business", "shirt", "mens"],
+    subCategory: "Men T's",
+    tags: ["aero", "t-shirts", "cotton", "casual", "clothing"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     availableSizes: {
       "S": 5,
@@ -576,14 +588,14 @@ const ProductsPage = ({ addToCart }) => {
   },
   {
     id: 46,
-    name: "Women's Summer Dress",
-    description: "Light and breezy summer dress perfect for warm weather",
+    name: "Aero 1987 Glitter Graphic Tee",
+    description: "Recycled Polyester | Crafted from a mix of pre- and post-consumer waste to help reduce landfills, Jersey knit, Printed & glitter ink logo & butterfly graphics, Style: 7159, Imported",
     price: 34.99,
-    image: "https://images.unsplash.com/photo-1569317002804-ab77bcf1bce4?w=500&h=500&fit=crop&auto=format",
+    image: "https://www.aeropostale.com/dw/image/v2/BBSG_PRD/on/demandware.static/-/Sites-master-catalog-aeropostale/default/dwed6f3005/80107159_007_main.jpg?sw=478&sh=557&sm=fit&sfrm=jpg",
     stock: 20,
     category: "apparel",
-    subCategory: "dresses",
-    tags: ["summer", "dress", "women", "casual", "lightweight"],
+    subCategory: "Women T's",
+   tags: ["aero", "t-shirts", "cotton", "casual", "clothing"],
     sizes: ["XS", "S", "M", "L"],
     availableSizes: {
       "XS": 3,
@@ -594,13 +606,13 @@ const ProductsPage = ({ addToCart }) => {
   },
   {
     id: 47,
-    name: "Men's Casual Pants",
-    description: "Comfortable casual pants for everyday wear",
+    name: "Aero Los Angeles Sequin Graphic Tee",
+    description: "Recycled Polyester | Crafted from a mix of pre- and post-consumer waste to help reduce landfills, Jersey knit, Logo text made with sequins + embroidered 1987 Los Angeles text, Style: 7150, Imported",
     price: 39.99,
-    image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=500&h=500&fit=crop&auto=format",
+    image: "https://www.aeropostale.com/dw/image/v2/BBSG_PRD/on/demandware.static/-/Sites-master-catalog-aeropostale/default/dw4c66faf6/80087150_665_main.jpg?sw=968&sh=1116&sm=fit&sfrm=jpg",
     stock: 30,
     category: "apparel",
-    subCategory: "pants",
+    subCategory: "Women T's",
     tags: ["pants", "casual", "mens", "comfort", "everyday"],
     sizes: ["30", "32", "34", "36", "38", "40"],
     availableSizes: {
@@ -614,21 +626,22 @@ const ProductsPage = ({ addToCart }) => {
   },
   {
     id: 48,
-    name: "Women's Yoga Leggings",
-    description: "Stretchy and comfortable yoga leggings for workouts or casual wear",
+    name: "Essential Baggy Open-Hem Sweatpant",
+    description: "Comfortable sweatpants in our softAF fleece fabric and baggy-fit silhouette. Features open-hem cuffs, exterior drawcords, side pockets and one back pocket for extra storage. Imported.",
     price: 24.99,
-    image: "https://images.unsplash.com/photo-1584335356277-00312bcb9e70?w=500&h=500&fit=crop&auto=format",
+    image: "https://img.abercrombie.com/is/image/anf/KIC_134-5087-00086-903_prod1?policy=product-medium",
     stock: 40,
     category: "apparel",
-    subCategory: "leggings",
+    subCategory: "Men Bottom's",
     tags: ["yoga", "leggings", "workout", "women", "activewear"],
-    sizes: ["XS", "S", "M", "L", "XL"],
+     sizes: ["30", "32", "34", "36", "38", "40"],
     availableSizes: {
-      "XS": 6,
-      "S": 10,
-      "M": 12,
-      "L": 8,
-      "XL": 4
+      "30": 4,
+      "32": 6,
+      "34": 8,
+      "36": 7,
+      "38": 3,
+      "40": 2
     }
   },
 
