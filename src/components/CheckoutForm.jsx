@@ -9,8 +9,8 @@ const CheckoutForm = ({ cart, total, onOrderPlaced }) => {
     phone: '',
     address: '',
     city: '',
-    zipCode: '',
-    notes: ''
+    notes: '',
+    paymentMethod: 'cod' // Default to Cash on Delivery
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -21,7 +21,6 @@ const CheckoutForm = ({ cart, total, onOrderPlaced }) => {
       ...prev,
       [name]: value
     }));
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -49,18 +48,17 @@ const CheckoutForm = ({ cart, total, onOrderPlaced }) => {
   };
 
   const generateOrderId = () => {
-    return 'STYLE-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return 'KD-' + Date.now().toString().slice(-8) + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   };
 
   const sendEmail = async (orderDetails) => {
     try {
-      // EmailJS Configuration
       const serviceID = 'YOUR_SERVICE_ID';
       const templateID = 'YOUR_TEMPLATE_ID';
       const userID = 'YOUR_PUBLIC_KEY';
       
       const emailParams = {
-        to_name: 'StyleHub Team',
+        to_name: 'Karibbean Dealz',
         customer_name: formData.name,
         customer_email: formData.email,
         customer_phone: formData.phone,
@@ -70,6 +68,7 @@ const CheckoutForm = ({ cart, total, onOrderPlaced }) => {
         order_items: orderDetails.itemList,
         order_date: new Date().toLocaleDateString(),
         order_time: new Date().toLocaleTimeString(),
+        payment_method: formData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer',
         customer_notes: formData.notes || 'No additional notes'
       };
 
@@ -82,14 +81,16 @@ const CheckoutForm = ({ cart, total, onOrderPlaced }) => {
   };
 
   const sendWhatsAppMessage = (orderDetails) => {
-    // Replace with your WhatsApp business number
-    const whatsappNumber = '1234567890';
+    const whatsappNumber = '6111904';
     
-    const message = `🛍️ *STYLEHUB ORDER CONFIRMATION* 🛍️
+    const paymentMethodText = formData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer';
+    
+    const message = `🛍️ *Karibbean Dealz ORDER CONFIRMATION* 🛍️
 
 📋 *Order ID:* ${orderDetails.orderId}
 📅 *Date:* ${new Date().toLocaleDateString()}
 ⏰ *Time:* ${new Date().toLocaleTimeString()}
+💳 *Payment Method:* ${paymentMethodText}
 
 👤 *Customer Information*
 • Name: ${formData.name}
@@ -121,7 +122,6 @@ ${formData.notes || 'No special instructions'}
     const encodedMessage = encodeURIComponent(message);
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
     
-    // Open WhatsApp in new tab
     window.open(whatsappURL, '_blank');
   };
 
@@ -147,19 +147,16 @@ ${formData.notes || 'No special instructions'}
         email: formData.email,
         phone: formData.phone,
         address: `${formData.address}, ${formData.city}, ${formData.zipCode}`,
+        paymentMethod: formData.paymentMethod,
         total: total,
         items: `${cart.reduce((sum, item) => sum + item.quantity, 0)} items`,
         itemList: itemList,
         notes: formData.notes
       };
 
-      // Send email
       const emailSent = await sendEmail(orderDetails);
-      
-      // Send WhatsApp message
       sendWhatsAppMessage(orderDetails);
 
-      // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       if (emailSent) {
@@ -176,6 +173,11 @@ ${formData.notes || 'No special instructions'}
       setIsSubmitting(false);
     }
   };
+
+  const paymentOptions = [
+    { id: 'cod', label: 'Cash on Delivery', description: 'Pay when you receive your order' },
+    { id: 'bank', label: 'Bank Transfer', description: 'Transfer funds directly to our bank account' }
+  ];
 
   return (
     <form className="checkout-form" onSubmit={handleSubmit}>
@@ -221,7 +223,7 @@ ${formData.notes || 'No special instructions'}
           value={formData.phone}
           onChange={handleChange}
           className={errors.phone ? 'error' : ''}
-          placeholder="+1 (234) 567-8900"
+          placeholder="+501 661-1904"
         />
         {errors.phone && <span className="error-message">{errors.phone}</span>}
       </div>
@@ -250,24 +252,31 @@ ${formData.notes || 'No special instructions'}
             value={formData.city}
             onChange={handleChange}
             className={errors.city ? 'error' : ''}
-            placeholder="New York"
+            placeholder="Belize City"
           />
           {errors.city && <span className="error-message">{errors.city}</span>}
         </div>
+      </div>
 
-        <div className="form-group">
-          <label htmlFor="zipCode">ZIP Code *</label>
-          <input
-            type="text"
-            id="zipCode"
-            name="zipCode"
-            value={formData.zipCode}
-            onChange={handleChange}
-            className={errors.zipCode ? 'error' : ''}
-            placeholder="10001"
-          />
-          {errors.zipCode && <span className="error-message">{errors.zipCode}</span>}
-        </div>
+      {/* Payment Method Dropdown */}
+      <div className="form-group">
+        <label htmlFor="paymentMethod">Payment Method *</label>
+        <select
+          id="paymentMethod"
+          name="paymentMethod"
+          value={formData.paymentMethod}
+          onChange={handleChange}
+          className="payment-dropdown"
+        >
+          {paymentOptions.map(option => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <small className="helper-text">
+          {paymentOptions.find(opt => opt.id === formData.paymentMethod)?.description}
+        </small>
       </div>
 
       <div className="form-group">
@@ -287,6 +296,7 @@ ${formData.notes || 'No special instructions'}
         <p><strong>📱 WhatsApp Order Process:</strong></p>
         <ol>
           <li>Fill in your shipping information above</li>
+          <li>Select your preferred payment method</li>
           <li>Click "Place Order & Open WhatsApp" button</li>
           <li>WhatsApp will open with your order details pre-filled</li>
           <li>Our team will contact you for payment confirmation</li>
@@ -311,11 +321,6 @@ ${formData.notes || 'No special instructions'}
           </>
         )}
       </button>
-      
-      <div className="payment-notice">
-        <p>💳 <strong>Payment Methods:</strong> Cash on Delivery • Bank Transfer • Mobile Payment</p>
-        <p>🚚 <strong>Delivery:</strong> 3-5 business days • Free shipping on orders over $75</p>
-      </div>
     </form>
   );
 };
