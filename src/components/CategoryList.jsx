@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 const CategoryList = () => {
   const categories = [
-    { name: 'mens-clothing', label: "Men's Fashion", icon: '👔', description: 'Shirts, Pants & More' },
+    { name: 'mens-clothing', label: "Men's F", icon: '👔', description: 'Shirts, Pants & More' },
     { name: 'womens-clothing', label: "Women's Fashion", icon: '👗', description: 'Dresses, Tops & More' },
     { name: 'electronics', label: 'Electronics', icon: '📱', description: 'Gadgets & Tech' },
     { name: 'beauty', label: 'Beauty', icon: '💄', description: 'Perfume & Skincare' },
@@ -18,18 +19,16 @@ const CategoryList = () => {
       
       <div className="categories-grid">
         {categories.map(category => (
-          <Link 
-            key={category.name}
-            to={`/category/${category.name}`}
-            className="category-card"
-          >
+          <div key={category.name} className="category-card">
             <div className="category-icon">{category.icon}</div>
             <div className="category-content">
               <h3>{category.label}</h3>
               <p>{category.description}</p>
-              <span className="category-link">Browse Products →</span>
+              <Link to="/products" className="category-link">
+                Browse Products →
+              </Link>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>
