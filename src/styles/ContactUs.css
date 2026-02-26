@@ -1,31 +1,57 @@
-/* ContactUs.css */
+/* ============================================================================
+   CONTACT US PAGE STYLES
+   ============================================================================ */
+
+/* ========== VARIABLES ========== */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --secondary-dark: #2980b9;
+  --text-dark: #333;
+  --text-medium: #666;
+  --text-light: #7f8c8d;
+  --border-color: #e0e0e0;
+  --border-light: #e9ecef;
+  --bg-light: #f8f9fa;
+  --bg-input: #ffffff;
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-focus: 0 0 0 3px rgba(52, 152, 219, 0.15);
+  --transition: 0.2s ease;
+  --border-radius: 6px;
+  --input-height: 48px;
+  --textarea-min-height: 140px;
+}
+
+/* ========== CONTAINER ========== */
 .contact-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   font-family: 'Arial', sans-serif;
-  color: #333;
+  color: var(--text-dark);
 }
 
+/* ========== HERO SECTION ========== */
 .contact-hero {
   text-align: center;
   margin-bottom: 3rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .contact-hero h1 {
   font-size: 2.5rem;
-  color: #2c3e50;
+  color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
 .hero-subtitle {
   font-size: 1.2rem;
-  color: #7f8c8d;
+  color: var(--text-light);
   font-weight: 300;
 }
 
+/* ========== MAIN CONTENT ========== */
 .contact-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -42,18 +68,18 @@
 .contact-section h2,
 .form-section h3,
 .faq-section h3 {
-  color: #2c3e50;
+  color: var(--primary-color);
   margin-bottom: 1rem;
   font-size: 1.8rem;
 }
 
 .section-description {
-  color: #666;
+  color: var(--text-medium);
   line-height: 1.6;
   margin-bottom: 2rem;
 }
 
-/* Contact Methods */
+/* ========== CONTACT METHODS ========== */
 .contact-methods {
   display: flex;
   flex-direction: column;
@@ -66,9 +92,9 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background: var(--bg-light);
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-light);
 }
 
 .method-icon {
@@ -78,11 +104,11 @@
 
 .method-content h4 {
   margin: 0 0 0.5rem 0;
-  color: #2c3e50;
+  color: var(--primary-color);
 }
 
 .method-hours {
-  color: #7f8c8d;
+  color: var(--text-light);
   font-size: 0.9rem;
   margin: 0 0 0.5rem 0;
 }
@@ -90,34 +116,34 @@
 .method-detail {
   margin: 0.25rem 0;
   font-weight: 500;
-  color: #333;
+  color: var(--text-dark);
 }
 
 .method-link {
   display: inline-block;
   margin-top: 0.5rem;
-  color: #3498db;
+  color: var(--secondary-color);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
+  transition: color var(--transition);
 }
 
 .method-link:hover {
-  color: #2980b9;
+  color: var(--secondary-dark);
   text-decoration: underline;
 }
 
-/* Business Hours */
+/* ========== BUSINESS HOURS ========== */
 .business-hours {
-  background: #f8f9fa;
+  background: var(--bg-light);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-light);
 }
 
 .business-hours h3 {
   margin-top: 0;
-  color: #2c3e50;
+  color: var(--primary-color);
 }
 
 .hours-grid {
@@ -128,23 +154,23 @@
 
 .hours-day {
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--primary-color);
 }
 
 .hours-time {
-  color: #666;
+  color: var(--text-medium);
 }
 
-/* FAQ Section */
+/* ========== FAQ SECTION ========== */
 .faq-section {
-  background: #f8f9fa;
+  background: var(--bg-light);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-light);
 }
 
 .faq-subtitle {
-  color: #7f8c8d;
+  color: var(--text-light);
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
 }
@@ -156,7 +182,7 @@
 }
 
 .faq-item {
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border-light);
   border-radius: 6px;
   overflow: hidden;
   background: white;
@@ -169,25 +195,25 @@
   justify-content: space-between;
   align-items: center;
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--primary-color);
   background: white;
-  transition: background 0.2s;
+  transition: background var(--transition);
 }
 
 .faq-question:hover {
-  background: #f8f9fa;
+  background: var(--bg-light);
 }
 
 .faq-arrow {
   font-size: 0.8rem;
-  color: #7f8c8d;
+  color: var(--text-light);
 }
 
 .faq-answer {
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  background: #f8f9fa;
-  color: #666;
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-light);
+  color: var(--text-medium);
   line-height: 1.6;
 }
 
@@ -195,13 +221,13 @@
   margin: 0;
 }
 
-/* Contact Form */
+/* ========== FORM SECTION - IMPROVED ALIGNMENT ========== */
 .form-section {
   background: white;
   padding: 2rem;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow);
 }
 
 .contact-form {
@@ -210,77 +236,183 @@
   gap: 1.5rem;
 }
 
+/* Form Row - Two columns with perfect alignment */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
+  width: 100%;
 }
 
+/* Form Group - Consistent spacing and alignment */
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .form-group label {
-  font-weight: 500;
-  color: #2c3e50;
+  font-weight: 600;
+  color: var(--primary-color);
   font-size: 0.9rem;
+  letter-spacing: 0.3px;
+  margin-left: 0.25rem;
 }
 
+/* Input, Select, Textarea - Consistent sizing and spacing */
 .form-input,
-.form-select,
-.form-textarea {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.form-select {
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: var(--border-radius);
   font-size: 1rem;
-  transition: border-color 0.2s;
+  font-family: inherit;
+  background-color: var(--bg-input);
+  transition: all var(--transition);
+  box-sizing: border-box;
+  line-height: normal;
 }
 
+.form-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: var(--bg-input);
+  transition: all var(--transition);
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: var(--textarea-min-height);
+  line-height: 1.5;
+}
+
+/* Focus states */
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  border-color: var(--secondary-color);
+  box-shadow: var(--shadow-focus);
+  background-color: white;
 }
 
-.form-textarea {
-  resize: vertical;
-  min-height: 120px;
-  font-family: inherit;
+/* Hover states */
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+  border-color: var(--secondary-color);
+  background-color: #fafafa;
 }
 
+/* Placeholder styling */
+.form-input::placeholder,
+.form-select::placeholder,
+.form-textarea::placeholder {
+  color: #aaa;
+  opacity: 1;
+}
+
+/* Select specific styling */
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2rem;
+  padding-right: 2.5rem;
+}
+
+/* Submit Button - Aligned left */
 .submit-btn {
-  background: #3498db;
+  background: var(--secondary-color);
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 4px;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all var(--transition);
   align-self: flex-start;
+  margin-top: 0.5rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+  min-width: 180px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submit-btn:hover {
-  background: #2980b9;
+  background: var(--secondary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
 }
 
 .submit-btn:active {
-  transform: translateY(1px);
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
 }
 
-/* Responsive Design */
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error state for form inputs */
+.form-input.error,
+.form-select.error,
+.form-textarea.error {
+  border-color: #e74c3c;
+  background-color: #fff5f5;
+}
+
+.form-input.error:focus,
+.form-select.error:focus,
+.form-textarea.error:focus {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+}
+
+/* Success message styling */
+.success-message {
+  background: #27ae60;
+  color: white;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
 @media (max-width: 900px) {
   .contact-content {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   
   .contact-hero h1 {
     font-size: 2rem;
+  }
+  
+  .form-row {
+    gap: 1rem;
   }
 }
 
@@ -291,6 +423,7 @@
   
   .form-row {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .hours-grid {
@@ -301,9 +434,32 @@
   .contact-method {
     flex-direction: column;
     text-align: center;
+    align-items: center;
   }
   
   .method-icon {
     margin-bottom: 0.5rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+}
+
+/* Touch-friendly adjustments for mobile */
+@media (max-width: 480px) {
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  .submit-btn {
+    height: 56px; /* Larger touch target */
   }
 }

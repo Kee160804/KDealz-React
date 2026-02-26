@@ -1,845 +1,14 @@
-// import React, { useState } from 'react';
-// import CheckoutForm from '../components/CheckoutForm';
-// import '../styles/CheckOut.css';
-
-// const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
-//   const [orderPlaced, setOrderPlaced] = useState(false);
-//   const [orderDetails, setOrderDetails] = useState(null);
-
-//   const handleOrderPlaced = (details) => {
-//     setOrderDetails(details);
-//     setOrderPlaced(true);
-//     clearCart();
-//   };
-
-//   if (orderPlaced) {
-//     return (
-//       <div className="order-confirmation-page">
-//         <div className="confirmation-container">
-//           <div className="success-animation">🎉</div>
-//           <h1>Order Confirmed!</h1>
-//           <p className="confirmation-message">
-//             Thank you for your order, {orderDetails.name}! Your StyleHub order #{orderDetails.orderId} has been received.
-//           </p>
-          
-//           <div className="order-details">
-//             <h2>📋 Order Details</h2>
-//             <div className="details-grid">
-//               <div className="detail-item">
-//                 <span className="detail-label">Order ID:</span>
-//                 <span className="detail-value">{orderDetails.orderId}</span>
-//               </div>
-//               <div className="detail-item">
-//                 <span className="detail-label">Total Amount:</span>
-//                 <span className="detail-value">${orderDetails.total.toFixed(2)}</span>
-//               </div>
-//               <div className="detail-item">
-//                 <span className="detail-label">Items:</span>
-//                 <span className="detail-value">{orderDetails.items}</span>
-//               </div>
-//               <div className="detail-item">
-//                 <span className="detail-label">Shipping to:</span>
-//                 <span className="detail-value">{orderDetails.address}</span>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="next-steps">
-//             <h3>📱 What happens next?</h3>
-//             <div className="steps-container">
-//               <div className="step-item">
-//                 <div className="step-number">1</div>
-//                 <div className="step-content">
-//                   <h4>Payment Confirmation</h4>
-//                   <p>Our team will contact you via WhatsApp at <strong>{orderDetails.phone}</strong> to confirm payment method</p>
-//                 </div>
-//               </div>
-//               <div className="step-item">
-//                 <div className="step-number">2</div>
-//                 <div className="step-content">
-//                   <h4>Order Processing</h4>
-//                   <p>Once payment is confirmed, we'll prepare your order for shipment</p>
-//                 </div>
-//               </div>
-//               <div className="step-item">
-//                 <div className="step-number">3</div>
-//                 <div className="step-content">
-//                   <h4>Shipping & Tracking</h4>
-//                   <p>You'll receive tracking information via email once your order ships</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="confirmation-actions">
-//             <button 
-//               onClick={() => window.location.href = '/'}
-//               className="btn btn-primary"
-//             >
-//               Continue Shopping
-//             </button>
-//             <button 
-//               onClick={() => window.print()}
-//               className="btn btn-outline"
-//             >
-//               Print Order Summary
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (cart.length === 0) {
-//     return (
-//       <div className="empty-cart-page">
-//         <div className="empty-cart-content">
-//           <div className="empty-cart-icon">🛒</div>
-//           <h1>Your Shopping Cart is Empty</h1>
-//           <p>Add some amazing products to your cart before proceeding to checkout.</p>
-//           <a href="/products" className="btn btn-primary">Browse Products</a>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="checkout-page">
-//       <div className="checkout-container">
-//         <div className="checkout-header">
-//           <h1>🛍️ Checkout</h1>
-//           <p>Complete your purchase in a few simple steps</p>
-//         </div>
-
-//         <div className="checkout-progress">
-//           <div className="progress-step active">
-//             <div className="step-number">1</div>
-//             <div className="step-info">
-//               <div className="step-title">Review Cart</div>
-//               <div className="step-status">Current</div>
-//             </div>
-//           </div>
-//           <div className="progress-step">
-//             <div className="step-number">2</div>
-//             <div className="step-info">
-//               <div className="step-title">Shipping Info</div>
-//               <div className="step-status">Next</div>
-//             </div>
-//           </div>
-//           <div className="progress-step">
-//             <div className="step-number">3</div>
-//             <div className="step-info">
-//               <div className="step-title">Place Order</div>
-//               <div className="step-status">Final</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="checkout-content">
-//           <div className="order-summary">
-//             <h2>📦 Order Summary</h2>
-//             <div className="order-items">
-//               {cart.map(item => (
-//                 <div key={item.id} className="order-item">
-//                   <div className="item-image">
-//                     <img src={item.image} alt={item.name} />
-//                   </div>
-//                   <div className="item-info">
-//                     <h4>{item.name}</h4>
-//                     <div className="item-details">
-//                       <span>Quantity: {item.quantity}</span>
-//                       <span>Price: ${item.price.toFixed(2)} each</span>
-//                     </div>
-//                   </div>
-//                   <div className="item-total">
-//                     ${(item.price * item.quantity).toFixed(2)}
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-            
-//             <div className="order-totals">
-//               <div className="total-row">
-//                 <span>Subtotal:</span>
-//                 <span>${getCartTotal().toFixed(2)}</span>
-//               </div>
-//               <div className="total-row">
-//                 <span>Shipping:</span>
-//                 <span className="shipping-note">Calculated after order</span>
-//               </div>
-//               <div className="total-row grand-total">
-//                 <span>Total:</span>
-//                 <span className="total-amount">${getCartTotal().toFixed(2)}</span>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="checkout-form-section">
-//             <CheckoutForm 
-//               cart={cart}
-//               total={getCartTotal()}
-//               onOrderPlaced={handleOrderPlaced}
-//             />
-            
-//             {/* <div className="payment-info">
-//               <h3>💳 Payment Information</h3>
-//               <div className="info-box">
-//                 <p><strong>Important Notice:</strong> No payment is processed directly on this website.</p>
-//                 <div className="payment-methods">
-//                   <div className="payment-method">
-//                     <div className="method-icon">💵</div>
-//                     <div className="method-info">
-//                       <h4>Cash on Delivery</h4>
-//                       <p>Pay when you receive your order</p>
-//                     </div>
-//                   </div>
-//                   <div className="payment-method">
-//                     <div className="method-icon">🏦</div>
-//                     <div className="method-info">
-//                       <h4>Bank Transfer</h4>
-//                       <p>Direct bank transfer details will be provided</p>
-//                     </div>
-//                   </div>
-//                   <div className="payment-method">
-//                     <div className="method-icon">📱</div>
-//                     <div className="method-info">
-//                       <h4>Mobile Payment</h4>
-//                       <p>Pay via mobile money or digital wallets</p>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div> */}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CheckoutPage;
-
-
-
-
-// import React, { useState } from 'react';
-// import CheckoutForm from '../components/CheckoutForm';
-// import '../styles/CheckOut.css';
-
-// const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
-//   const [orderPlaced, setOrderPlaced] = useState(false);
-//   const [orderDetails, setOrderDetails] = useState(null);
-
-//   const handleOrderPlaced = (details) => {
-//     setOrderDetails(details);
-//     setOrderPlaced(true);
-//     clearCart();
-//   };
-
-//   if (orderPlaced) {
-//     return (
-//       <div className="order-confirmation-page">
-//         <div className="confirmation-container">
-//           <div className="success-animation">
-//             <div className="checkmark">✓</div>
-//           </div>
-//           <h1>Order Confirmed!</h1>
-//           <p className="confirmation-message">
-//             Thank you for your order, {orderDetails.name}! Your Karibbean Dealz order #{orderDetails.orderId} has been received.
-//           </p>
-          
-//           <div className="order-details-card">
-//             <h2>📋 Order Details</h2>
-//             <div className="details-grid">
-//               <div className="detail-item">
-//                 <div className="detail-label">Order ID</div>
-//                 <div className="detail-value">{orderDetails.orderId}</div>
-//               </div>
-//               <div className="detail-item">
-//                 <div className="detail-label">Total Amount</div>
-//                 <div className="detail-value">${orderDetails.total.toFixed(2)}</div>
-//               </div>
-//               <div className="detail-item">
-//                 <div className="detail-label">Items</div>
-//                 <div className="detail-value">{orderDetails.items}</div>
-//               </div>
-//               <div className="detail-item">
-//                 <div className="detail-label">Payment Method</div>
-//                 <div className="detail-value">
-//                   {orderDetails.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer'}
-//                 </div>
-//               </div>
-//               <div className="detail-item full-width">
-//                 <div className="detail-label">Shipping Address</div>
-//                 <div className="detail-value">{orderDetails.address}</div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="next-steps-card">
-//             <h3>📱 What happens next?</h3>
-//             <div className="steps-container">
-//               <div className="step-item">
-//                 <div className="step-icon">1️⃣</div>
-//                 <div className="step-content">
-//                   <h4>WhatsApp Confirmation</h4>
-//                   <p>Keep WhatsApp open! Our team will message you to confirm payment details.</p>
-//                 </div>
-//               </div>
-//               <div className="step-item">
-//                 <div className="step-icon">2️⃣</div>
-//                 <div className="step-content">
-//                   <h4>Payment Processing</h4>
-//                   <p>Once payment is confirmed, we'll prepare your order for shipment.</p>
-//                 </div>
-//               </div>
-//               <div className="step-item">
-//                 <div className="step-icon">3️⃣</div>
-//                 <div className="step-content">
-//                   <h4>Shipping & Tracking</h4>
-//                   <p>You'll receive tracking information via email once your order ships.</p>
-//                 </div>
-//               </div>
-//             </div>
-            
-//             <div className="whatsapp-notice">
-//               <div className="whatsapp-icon">💬</div>
-//               <div className="notice-content">
-//                 <strong>Important:</strong> Please keep WhatsApp open to receive order updates and respond to our team.
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="confirmation-actions">
-//             <button 
-//               onClick={() => window.location.href = '/'}
-//               className="btn btn-primary"
-//             >
-//               Continue Shopping
-//             </button>
-//             <button 
-//               onClick={() => window.print()}
-//               className="btn btn-outline"
-//             >
-//               Print Order Summary
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (cart.length === 0) {
-//     return (
-//       <div className="empty-cart-page">
-//         <div className="empty-cart-container">
-//           <div className="empty-cart-icon">🛒</div>
-//           <h1>Your Shopping Cart is Empty</h1>
-//           <p>Add some amazing products to your cart before proceeding to checkout.</p>
-//           <div className="empty-cart-actions">
-//             <a href="/products" className="btn btn-primary">Browse Products</a>
-//             <a href="/" className="btn btn-outline">Return to Home</a>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   const total = getCartTotal();
-//   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-//   return (
-//     <div className="checkout-page">
-//       <div className="checkout-container">
-//         <div className="checkout-header">
-//           <h1>🛍️ Checkout</h1>
-//           <p className="checkout-subtitle">Complete your purchase in a few simple steps</p>
-//         </div>
-
-//         <div className="checkout-progress">
-//           <div className="progress-step active">
-//             <div className="step-indicator">
-//               <div className="step-number">1</div>
-//               <div className="step-line"></div>
-//             </div>
-//             <div className="step-info">
-//               <div className="step-title">Cart Review</div>
-//               <div className="step-description">{itemCount} items</div>
-//             </div>
-//           </div>
-//           <div className="progress-step">
-//             <div className="step-indicator">
-//               <div className="step-number">2</div>
-//               <div className="step-line"></div>
-//             </div>
-//             <div className="step-info">
-//               <div className="step-title">Shipping Info</div>
-//               <div className="step-description">Delivery details</div>
-//             </div>
-//           </div>
-//           <div className="progress-step">
-//             <div className="step-indicator">
-//               <div className="step-number">3</div>
-//             </div>
-//             <div className="step-info">
-//               <div className="step-title">Place Order</div>
-//               <div className="step-description">Confirm & pay</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="checkout-content">
-//           <div className="order-summary-card">
-//             <div className="card-header">
-//               <h2>📦 Order Summary</h2>
-//               <span className="item-count">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
-//             </div>
-            
-//             <div className="order-items">
-//               {cart.map(item => (
-//                 <div key={item.id} className="order-item">
-//                   <div className="item-image">
-//                     <img src={item.image || '/placeholder-item.jpg'} alt={item.name} />
-//                     <span className="quantity-badge">{item.quantity}</span>
-//                   </div>
-//                   <div className="item-info">
-//                     <h4 className="item-name">{item.name}</h4>
-//                     <p className="item-price">${item.price.toFixed(2)} each</p>
-//                   </div>
-//                   <div className="item-total">
-//                     ${(item.price * item.quantity).toFixed(2)}
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-            
-//             <div className="order-totals">
-//               <div className="total-row">
-//                 <span>Subtotal</span>
-//                 <span>${total.toFixed(2)}</span>
-//               </div>
-//               <div className="total-row">
-//                 <span>Shipping</span>
-//                 <span className="shipping-note">Calculated after order</span>
-//               </div>
-//               <div className="total-row">
-//                 <span>Tax</span>
-//                 <span>$0.00</span>
-//               </div>
-//               <div className="total-row grand-total">
-//                 <span>Total</span>
-//                 <span className="total-amount">${total.toFixed(2)}</span>
-//               </div>
-//             </div>
-            
-//             <div className="order-notice">
-//               <div className="notice-icon">ℹ️</div>
-//               <p>Shipping costs will be confirmed via WhatsApp after order placement.</p>
-//             </div>
-//           </div>
-
-//           <div className="checkout-form-container">
-//             <CheckoutForm 
-//               cart={cart}
-//               total={total}
-//               onOrderPlaced={handleOrderPlaced}
-//             />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CheckoutPage; 
-
-
-
-
-
-
-
-// import React, { useState } from 'react';
-// import CheckoutForm from '../components/CheckoutForm';
-// import '../styles/CheckOut.css';
-
-// const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
-//   const [orderPlaced, setOrderPlaced] = useState(false);
-//   const [orderDetails, setOrderDetails] = useState(null);
-
-//   const handleOrderPlaced = (details) => {
-//     setOrderDetails(details);
-//     setOrderPlaced(true);
-//     clearCart();
-//   };
-
-//   if (orderPlaced) {
-//     return (
-//       <div className="order-confirmation-page">
-//         <div className="confirmation-container">
-//           <div className="success-animation">
-//             <div className="checkmark">✓</div>
-//           </div>
-//           <h1>Order Confirmed!</h1>
-//           <p className="confirmation-message">
-//             Thank you for your order, {orderDetails.name}! Your Karibbean Dealz order #{orderDetails.orderId} has been received.
-//           </p>
-          
-//           <div className="order-details-card">
-//             <h2>📋 Order Details</h2>
-//             <div className="details-grid">
-//               <div className="detail-item">
-//                 <div className="detail-label">Order ID</div>
-//                 <div className="detail-value">{orderDetails.orderId}</div>
-//               </div>
-//               <div className="detail-item">
-//                 <div className="detail-label">Total Amount</div>
-//                 <div className="detail-value">${orderDetails.total.toFixed(2)}</div>
-//               </div>
-//               <div className="detail-item">
-//                 <div className="detail-label">Items</div>
-//                 <div className="detail-value">{orderDetails.items}</div>
-//               </div>
-//               <div className="detail-item">
-//                 <div className="detail-label">Payment Method</div>
-//                 <div className="detail-value">
-//                   {orderDetails.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer'}
-//                 </div>
-//               </div>
-//               <div className="detail-item full-width">
-//                 <div className="detail-label">Shipping Address</div>
-//                 <div className="detail-value">{orderDetails.address}</div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="next-steps-card">
-//             <h3>📱 What happens next?</h3>
-//             <div className="steps-container">
-//               <div className="step-item">
-//                 <div className="step-icon">1️⃣</div>
-//                 <div className="step-content">
-//                   <h4>WhatsApp Confirmation</h4>
-//                   <p>Keep WhatsApp open! Our team will message you to confirm payment details.</p>
-//                 </div>
-//               </div>
-//               <div className="step-item">
-//                 <div className="step-icon">2️⃣</div>
-//                 <div className="step-content">
-//                   <h4>Payment Processing</h4>
-//                   <p>Once payment is confirmed, we'll prepare your order for shipment.</p>
-//                 </div>
-//               </div>
-//               <div className="step-item">
-//                 <div className="step-icon">3️⃣</div>
-//                 <div className="step-content">
-//                   <h4>Shipping & Tracking</h4>
-//                   <p>You'll receive tracking information via email once your order ships.</p>
-//                 </div>
-//               </div>
-//             </div>
-            
-//             <div className="whatsapp-notice">
-//               <div className="whatsapp-icon">💬</div>
-//               <div className="notice-content">
-//                 <strong>Important:</strong> Please keep WhatsApp open to receive order updates and respond to our team.
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="confirmation-actions">
-//             <button 
-//               onClick={() => window.location.href = '/'}
-//               className="btn btn-primary"
-//             >
-//               Continue Shopping
-//             </button>
-//             <button 
-//               onClick={() => window.print()}
-//               className="btn btn-outline"
-//             >
-//               Print Order Summary
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (cart.length === 0) {
-//     return (
-//       <div className="empty-cart-page">
-//         <div className="empty-cart-container">
-//           <div className="empty-cart-icon">🛒</div>
-//           <h1>Your Shopping Cart is Empty</h1>
-//           <p>Add some amazing products to your cart before proceeding to checkout.</p>
-//           <div className="empty-cart-actions">
-//             <a href="/products" className="btn btn-primary">Browse Products</a>
-//             <a href="/" className="btn btn-outline">Return to Home</a>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   const total = getCartTotal();
-//   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-//   return (
-//     <div className="checkout-page">
-//       <div className="checkout-container">
-//         <div className="checkout-header">
-//           <h1>🛍️ Checkout</h1>
-//           <p className="checkout-subtitle">Complete your purchase in a few simple steps</p>
-//         </div>
-
-//         <div className="checkout-progress">
-//           <div className="progress-step active">
-//             <div className="step-indicator">
-//               <div className="step-number">1</div>
-//               <div className="step-line"></div>
-//             </div>
-//             <div className="step-info">
-//               <div className="step-title">Cart Review</div>
-//               <div className="step-description">{itemCount} items</div>
-//             </div>
-//           </div>
-//           <div className="progress-step">
-//             <div className="step-indicator">
-//               <div className="step-number">2</div>
-//               <div className="step-line"></div>
-//             </div>
-//             <div className="step-info">
-//               <div className="step-title">Shipping Info</div>
-//               <div className="step-description">Delivery details</div>
-//             </div>
-//           </div>
-//           <div className="progress-step">
-//             <div className="step-indicator">
-//               <div className="step-number">3</div>
-//             </div>
-//             <div className="step-info">
-//               <div className="step-title">Place Order</div>
-//               <div className="step-description">Confirm & pay</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="checkout-content">
-//           {/* Left Column - Order Summary & Payment/WhatsApp Cards */}
-//           <div className="left-column">
-//             {/* Order Summary Card */}
-//             <div className="order-summary-card">
-//               <div className="card-header">
-//                 <div className="card-icon">📦</div>
-//                 <div>
-//                   <h3>Order Summary</h3>
-//                   <p className="card-subtitle">{itemCount} {itemCount === 1 ? 'item' : 'items'}</p>
-//                 </div>
-//               </div>
-              
-//               <div className="card-content">
-//                 <div className="order-items">
-//                   {cart.map(item => (
-//                     <div key={item.id} className="order-item">
-//                       <div className="item-image">
-//                         <img src={item.image || '/placeholder-item.jpg'} alt={item.name} />
-//                         <span className="quantity-badge">{item.quantity}</span>
-//                       </div>
-//                       <div className="item-info">
-//                         <h4 className="item-name">{item.name}</h4>
-//                         <p className="item-price">${item.price.toFixed(2)} each</p>
-//                       </div>
-//                       <div className="item-total">
-//                         ${(item.price * item.quantity).toFixed(2)}
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-                
-//                 <div className="order-totals">
-//                   <div className="total-row">
-//                     <span>Subtotal</span>
-//                     <span>${total.toFixed(2)}</span>
-//                   </div>
-//                   <div className="total-row">
-//                     <span>Shipping</span>
-//                     <span className="shipping-note">Calculated after order</span>
-//                   </div>
-//                   <div className="total-row">
-//                     <span>Tax</span>
-//                     <span>$0.00</span>
-//                   </div>
-//                   <div className="total-row grand-total">
-//                     <span>Total</span>
-//                     <span className="total-amount">${total.toFixed(2)}</span>
-//                   </div>
-//                 </div>
-                
-//                 <div className="order-notice">
-//                   <div className="notice-icon">ℹ️</div>
-//                   <p>Shipping costs will be confirmed via WhatsApp after order placement.</p>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* Payment Method Card */}
-//             <div className="payment-method-card">
-//               <div className="card-header">
-//                 <div className="card-icon">💳</div>
-//                 <div>
-//                   <h3>Payment Method</h3>
-//                   <p className="card-subtitle">Select how you'd like to pay</p>
-//                 </div>
-//               </div>
-              
-//               <div className="card-content">
-//                 <div className="payment-options">
-//                   <label className="payment-option">
-//                     <input type="radio" name="payment" value="cod" defaultChecked />
-//                     <div className="payment-content">
-//                       <div className="payment-icon">💰</div>
-//                       <div className="payment-info">
-//                         <div className="payment-title">Cash on Delivery</div>
-//                         <div className="payment-description">Pay when you receive your order</div>
-//                       </div>
-//                     </div>
-//                   </label>
-                  
-//                   <label className="payment-option">
-//                     <input type="radio" name="payment" value="bank" />
-//                     <div className="payment-content">
-//                       <div className="payment-icon">🏦</div>
-//                       <div className="payment-info">
-//                         <div className="payment-title">Bank Transfer</div>
-//                         <div className="payment-description">Transfer funds to our bank account</div>
-//                       </div>
-//                     </div>
-//                   </label>
-//                 </div>
-                
-//                 <div className="payment-notice">
-//                   <div className="notice-icon">ℹ️</div>
-//                   <p>Payment details will be confirmed via WhatsApp after order placement.</p>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* WhatsApp Process Card */}
-//             <div className="whatsapp-card">
-//               <div className="card-header">
-//                 <div className="card-icon">📱</div>
-//                 <div>
-//                   <h3>WhatsApp Process</h3>
-//                   <p className="card-subtitle">How your order will be confirmed</p>
-//                 </div>
-//               </div>
-              
-//               <div className="card-content">
-//                 <div className="process-steps">
-//                   <div className="process-step">
-//                     <div className="step-number">1</div>
-//                     <div className="step-info">
-//                       <h4>Complete Form</h4>
-//                       <p>Fill in all your shipping details</p>
-//                     </div>
-//                   </div>
-//                   <div className="process-step">
-//                     <div className="step-number">2</div>
-//                     <div className="step-info">
-//                       <h4>Select Payment</h4>
-//                       <p>Choose your preferred payment method</p>
-//                     </div>
-//                   </div>
-//                   <div className="process-step">
-//                     <div className="step-number">3</div>
-//                     <div className="step-info">
-//                       <h4>Place Order</h4>
-//                       <p>Submit and WhatsApp will open automatically</p>
-//                     </div>
-//                   </div>
-//                   <div className="process-step">
-//                     <div className="step-number">4</div>
-//                     <div className="step-info">
-//                       <h4>Get Confirmation</h4>
-//                       <p>Our team contacts you via WhatsApp</p>
-//                     </div>
-//                   </div>
-//                 </div>
-                
-//                 <div className="whatsapp-notice">
-//                   <div className="notice-icon">💡</div>
-//                   <p><strong>Important Tip:</strong> Keep WhatsApp open to receive real-time updates and respond quickly to our team.</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Right Column - Shipping Information */}
-//           <div className="right-column">
-//             <div className="shipping-card">
-//               <div className="card-header">
-//                 <div className="card-icon">🚚</div>
-//                 <div>
-//                   <h3>Shipping Information</h3>
-//                   <p className="card-subtitle">Please provide your details for order processing</p>
-//                 </div>
-//               </div>
-              
-//               <div className="card-content">
-//                 <CheckoutForm 
-//                   cart={cart}
-//                   total={total}
-//                   onOrderPlaced={handleOrderPlaced}
-//                 />
-//               </div>
-              
-//               {/* Order Total & Submit Button */}
-//               <div className="order-total-section">
-//                 <div className="total-display">
-//                   <div className="total-label">Order Total</div>
-//                   <div className="total-amount">${total.toFixed(2)}</div>
-//                 </div>
-                
-//                 <button 
-//                   type="submit" 
-//                   className="submit-order-btn"
-//                   onClick={(e) => {
-//                     e.preventDefault();
-//                     // This will be handled by the CheckoutForm
-//                     document.querySelector('.checkout-form')?.dispatchEvent(
-//                       new Event('submit', { bubbles: true })
-//                     );
-//                   }}
-//                 >
-//                   <span className="btn-icon">📱</span>
-//                   Place Order & Open WhatsApp
-//                   <span className="btn-arrow">→</span>
-//                 </button>
-                
-//                 <div className="security-notice">
-//                   <div className="security-icon">🔒</div>
-//                   <p>Your information is secure. No payment is processed on this site.</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CheckoutPage;
-
-
-
-
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import emailjs from '@emailjs/browser';
 import '../styles/CheckOut.css';
 
+/**
+ * CheckoutPage Component
+ * Handles order processing with form validation, WhatsApp integration, and order confirmation
+ * Features multi-step checkout, payment method selection, and comprehensive order summary
+ */
 const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
+  // ─── State Management ────────────────────────────────────────────────
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -856,60 +25,104 @@ const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
     paymentMethod: 'cod'
   });
 
-  // Handle form changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
+  // ─── Constants ───────────────────────────────────────────────────────
+  const WHATSAPP_NUMBER = '6111904';
+  const EMAIL_CONFIG = {
+    serviceID: 'YOUR_SERVICE_ID',
+    templateID: 'YOUR_TEMPLATE_ID',
+    userID: 'YOUR_PUBLIC_KEY'
   };
 
-  // Form validation
-  const validateForm = () => {
+  const PAYMENT_OPTIONS = [
+    { 
+      id: 'cod', 
+      label: 'Cash on Delivery', 
+      description: 'Pay when you receive your order', 
+      icon: '💰',
+      notice: 'Cash payment will be collected upon delivery. Exact change is appreciated.'
+    },
+    { 
+      id: 'bank', 
+      label: 'Bank Transfer', 
+      description: 'Transfer funds to our bank account', 
+      icon: '🏦',
+      notice: 'Bank transfer details will be sent via WhatsApp after order confirmation.'
+    }
+  ];
+
+  // ─── Derived Values ──────────────────────────────────────────────────
+  const total = useMemo(() => getCartTotal(), [getCartTotal]);
+  const itemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
+  const currentPaymentOption = useMemo(() => 
+    PAYMENT_OPTIONS.find(opt => opt.id === formData.paymentMethod), 
+    [formData.paymentMethod]
+  );
+
+  // ─── Form Validation ─────────────────────────────────────────────────
+  const validateForm = useCallback(() => {
     const newErrors = {};
-    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
     if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
-  // Generate order ID
-  const generateOrderId = () => {
-    return 'KD-' + Date.now().toString().slice(-8) + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  };
+  // ─── Event Handlers ──────────────────────────────────────────────────
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  }, [errors]);
 
-  // Send email
-  const sendEmail = async (orderDetails) => {
+  const generateOrderId = useCallback(() => {
+    const timestamp = Date.now().toString().slice(-8);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `KD-${timestamp}-${random}`;
+  }, []);
+
+  const formatItemList = useCallback(() => {
+    return cart.map(item => 
+      `• ${item.name} (Qty: ${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`
+    ).join('\n');
+  }, [cart]);
+
+  const createOrderDetails = useCallback((orderId, itemList) => ({
+    orderId,
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone,
+    address: `${formData.address}, ${formData.city}, ${formData.zipCode}`,
+    paymentMethod: formData.paymentMethod,
+    total: total,
+    items: `${itemCount} items`,
+    itemList,
+    notes: formData.notes || 'No additional notes'
+  }), [formData, total, itemCount]);
+
+  // ─── Communication Methods ───────────────────────────────────────────
+  const sendEmail = useCallback(async (orderDetails) => {
     try {
-      const serviceID = 'YOUR_SERVICE_ID';
-      const templateID = 'YOUR_TEMPLATE_ID';
-      const userID = 'YOUR_PUBLIC_KEY';
-      
       const emailParams = {
         to_name: 'Karibbean Dealz',
         customer_name: formData.name,
         customer_email: formData.email,
         customer_phone: formData.phone,
-        customer_address: `${formData.address}, ${formData.city}, ${formData.zipCode}`,
+        customer_address: orderDetails.address,
         order_id: orderDetails.orderId,
-        order_total: `$${getCartTotal().toFixed(2)}`,
+        order_total: `$${orderDetails.total.toFixed(2)}`,
         order_items: orderDetails.itemList,
         order_date: new Date().toLocaleDateString(),
         order_time: new Date().toLocaleTimeString(),
@@ -917,23 +130,24 @@ const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
         customer_notes: formData.notes || 'No additional notes'
       };
 
-      await emailjs.send(serviceID, templateID, emailParams, userID);
+      await emailjs.send(
+        EMAIL_CONFIG.serviceID, 
+        EMAIL_CONFIG.templateID, 
+        emailParams, 
+        EMAIL_CONFIG.userID
+      );
       return true;
     } catch (error) {
       console.error('Failed to send email:', error);
       return false;
     }
-  };
+  }, [formData, EMAIL_CONFIG]);
 
-  // Send WhatsApp message
-  const sendWhatsAppMessage = (orderDetails) => {
-    const whatsappNumber = '6111904';
+  const sendWhatsAppMessage = useCallback((orderDetails) => {
     const paymentMethodText = formData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer';
-    const itemList = cart.map(item => 
-      `• ${item.name} (Qty: ${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`
-    ).join('\n');
     
-    const message = `🛍️ *Karibbean Dealz ORDER CONFIRMATION* 🛍️
+    const message = `
+🛍️ *Karibbean Dealz ORDER CONFIRMATION* 🛍️
 
 📋 *Order ID:* ${orderDetails.orderId}
 📅 *Date:* ${new Date().toLocaleDateString()}
@@ -944,15 +158,15 @@ const CheckoutPage = ({ cart, getCartTotal, clearCart }) => {
 • Name: ${formData.name}
 • Email: ${formData.email}
 • Phone: ${formData.phone}
-• Address: ${formData.address}, ${formData.city}, ${formData.zipCode}
+• Address: ${orderDetails.address}
 
 🛒 *Order Details*
-${itemList}
+${orderDetails.itemList}
 
 💰 *Order Summary*
-• Subtotal: $${getCartTotal().toFixed(2)}
+• Subtotal: $${orderDetails.total.toFixed(2)}
 • Shipping: To be confirmed
-• **Total: $${getCartTotal().toFixed(2)}**
+• **Total: $${orderDetails.total.toFixed(2)}**
 
 📝 *Customer Notes:*
 ${formData.notes || 'No special instructions'}
@@ -965,16 +179,15 @@ ${formData.notes || 'No special instructions'}
 3. Update customer with shipping details
 
 📞 *Contact Customer:* ${formData.phone}
-📧 *Email:* ${formData.email}`;
+📧 *Email:* ${formData.email}`.trim();
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    
+    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
     window.open(whatsappURL, '_blank');
-  };
+  }, [formData, WHATSAPP_NUMBER]);
 
-  // Handle order submission
-  const handleSubmit = async (e) => {
+  // ─── Order Submission ────────────────────────────────────────────────
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -986,34 +199,24 @@ ${formData.notes || 'No special instructions'}
 
     try {
       const orderId = generateOrderId();
-      const itemList = cart.map(item => 
-        `• ${item.name} (Qty: ${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`
-      ).join('\n');
-      
-      const orderDetails = {
-        orderId,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        address: `${formData.address}, ${formData.city}, ${formData.zipCode}`,
-        paymentMethod: formData.paymentMethod,
-        total: getCartTotal(),
-        items: `${cart.reduce((sum, item) => sum + item.quantity, 0)} items`,
-        itemList: itemList,
-        notes: formData.notes
-      };
+      const itemList = formatItemList();
+      const orderDetails = createOrderDetails(orderId, itemList);
 
+      // Send communications
       const emailSent = await sendEmail(orderDetails);
       sendWhatsAppMessage(orderDetails);
 
+      // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 1500));
 
+      // Show appropriate message
       if (emailSent) {
         alert('🎉 Order placed successfully! Confirmation email sent.');
       } else {
         alert('🎉 Order placed! (Note: Email notification failed)');
       }
 
+      // Update state and clear cart
       setOrderDetails(orderDetails);
       setOrderPlaced(true);
       clearCart();
@@ -1023,469 +226,557 @@ ${formData.notes || 'No special instructions'}
       alert('There was an error processing your order. Please try again or contact us directly.');
       setIsSubmitting(false);
     }
-  };
+  }, [validateForm, generateOrderId, formatItemList, createOrderDetails, sendEmail, sendWhatsAppMessage, clearCart]);
 
-  // Payment options
-  const paymentOptions = [
-    { id: 'cod', label: 'Cash on Delivery', description: 'Pay when you receive your order', icon: '💰' },
-    { id: 'bank', label: 'Bank Transfer', description: 'Transfer funds to our bank account', icon: '🏦' }
-  ];
+  // ─── Navigation Handlers ─────────────────────────────────────────────
+  const navigateHome = useCallback(() => {
+    window.location.href = '/';
+  }, []);
 
-  // Order placed confirmation page
+  const printOrder = useCallback(() => {
+    window.print();
+  }, []);
+
+  // ─── Render Helpers ──────────────────────────────────────────────────
   if (orderPlaced) {
-    return (
-      <div className="order-confirmation-page">
-        <div className="confirmation-container">
-          <div className="success-animation">🎉</div>
-          <h1>Order Confirmed!</h1>
-          <p className="confirmation-message">
-            Thank you for your order, {orderDetails.name}! Your Karibbean Dealz order #{orderDetails.orderId} has been received.
-          </p>
-          
-          <div className="order-details">
-            <h2>📋 Order Details</h2>
-            <div className="details-grid">
-              <div className="detail-item">
-                <span className="detail-label">Order ID:</span>
-                <span className="detail-value">{orderDetails.orderId}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">Total Amount:</span>
-                <span className="detail-value">${orderDetails.total.toFixed(2)}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">Items:</span>
-                <span className="detail-value">{orderDetails.items}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">Shipping to:</span>
-                <span className="detail-value">{orderDetails.address}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="next-steps">
-            <h3>📱 What happens next?</h3>
-            <div className="steps-container">
-              <div className="step-item">
-                <div className="step-number">1</div>
-                <div className="step-content">
-                  <h4>Payment Confirmation</h4>
-                  <p>Our team will contact you via WhatsApp at <strong>{orderDetails.phone}</strong> to confirm payment method</p>
-                </div>
-              </div>
-              <div className="step-item">
-                <div className="step-number">2</div>
-                <div className="step-content">
-                  <h4>Order Processing</h4>
-                  <p>Once payment is confirmed, we'll prepare your order for shipment</p>
-                </div>
-              </div>
-              <div className="step-item">
-                <div className="step-number">3</div>
-                <div className="step-content">
-                  <h4>Shipping & Tracking</h4>
-                  <p>You'll receive tracking information via email once your order ships</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="confirmation-actions">
-            <button 
-              onClick={() => window.location.href = '/'}
-              className="btn btn-primary"
-            >
-              Continue Shopping
-            </button>
-            <button 
-              onClick={() => window.print()}
-              className="btn btn-outline"
-            >
-              Print Order Summary
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <OrderConfirmation 
+      orderDetails={orderDetails} 
+      onContinue={navigateHome}
+      onPrint={printOrder}
+    />;
   }
 
-  // Empty cart
   if (cart.length === 0) {
-    return (
-      <div className="empty-cart-page">
-        <div className="empty-cart-content">
-          <div className="empty-cart-icon">🛒</div>
-          <h1>Your Shopping Cart is Empty</h1>
-          <p>Add some amazing products to your cart before proceeding to checkout.</p>
-          <a href="/products" className="btn btn-primary">Browse Products</a>
-        </div>
-      </div>
-    );
+    return <EmptyCart />;
   }
-
-  const total = getCartTotal();
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="checkout-page">
       <div className="checkout-container">
-        <div className="checkout-header">
-          <h1>🛍️ Checkout</h1>
-          <p>Complete your purchase in a few simple steps</p>
-        </div>
-
-        <div className="checkout-progress">
-          <div className="progress-step active">
-            <div className="step-number">1</div>
-            <div className="step-info">
-              <div className="step-title">Review Cart</div>
-              <div className="step-status">Current</div>
-            </div>
-          </div>
-          <div className="progress-step">
-            <div className="step-number">2</div>
-            <div className="step-info">
-              <div className="step-title">Shipping Info</div>
-              <div className="step-status">Next</div>
-            </div>
-          </div>
-          <div className="progress-step">
-            <div className="step-number">3</div>
-            <div className="step-info">
-              <div className="step-title">Place Order</div>
-              <div className="step-status">Final</div>
-            </div>
-          </div>
-        </div>
-
+        <CheckoutHeader />
+        <CheckoutProgress currentStep={1} />
+        
         <form className="checkout-content" onSubmit={handleSubmit}>
-          {/* Left Column */}
-          <div className="left-column">
-            {/* Order Summary Card */}
-            <div className="order-summary-card">
-              <div className="card-header">
-                <div className="card-icon">📦</div>
-                <div>
-                  <h3>Order Summary</h3>
-                  <p className="card-subtitle">{itemCount} {itemCount === 1 ? 'item' : 'items'}</p>
-                </div>
-              </div>
-              
-              <div className="card-content">
-                <div className="order-items">
-                  {cart.map(item => (
-                    <div key={item.id} className="order-item">
-                      <div className="item-image">
-                        <img src={item.image || '/placeholder-item.jpg'} alt={item.name} />
-                        <span className="quantity-badge">{item.quantity}</span>
-                      </div>
-                      <div className="item-info">
-                        <h4 className="item-name">{item.name}</h4>
-                        <p className="item-price">${item.price.toFixed(2)} each</p>
-                      </div>
-                      <div className="item-total">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="order-totals">
-                  <div className="total-row">
-                    <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <div className="total-row">
-                    <span>Shipping</span>
-                    <span className="shipping-note">Calculated after order</span>
-                  </div>
-                  <div className="total-row">
-                    <span>Tax</span>
-                    <span>$0.00</span>
-                  </div>
-                  <div className="total-row grand-total">
-                    <span>Total</span>
-                    <span className="total-amount">${total.toFixed(2)}</span>
-                  </div>
-                </div>
-                
-                <div className="order-notice">
-                  <div className="notice-icon">ℹ️</div>
-                  <p>Shipping costs will be confirmed via WhatsApp after order placement.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Method Card */}
-            <div className="payment-method-card">
-              <div className="card-header">
-                <div className="card-icon">💳</div>
-                <div>
-                  <h3>Payment Method</h3>
-                  <p className="card-subtitle">Select how you'd like to pay</p>
-                </div>
-              </div>
-              
-              <div className="card-content">
-                <div className="payment-options">
-                  {paymentOptions.map(option => (
-                    <label 
-                      key={option.id}
-                      className={`payment-option ${formData.paymentMethod === option.id ? 'selected' : ''}`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={option.id}
-                        checked={formData.paymentMethod === option.id}
-                        onChange={handleChange}
-                        className="payment-radio"
-                      />
-                      <div className="payment-content">
-                        <div className="payment-icon">{option.icon}</div>
-                        <div className="payment-info">
-                          <div className="payment-title">{option.label}</div>
-                          <div className="payment-description">{option.description}</div>
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                
-                <div className="payment-notice">
-                  <div className="notice-icon">ℹ️</div>
-                  <p>
-                    {formData.paymentMethod === 'cod' 
-                      ? 'Cash payment will be collected upon delivery. Exact change is appreciated.' 
-                      : 'Bank transfer details will be sent via WhatsApp after order confirmation.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* WhatsApp Process Card */}
-            <div className="whatsapp-card">
-              <div className="card-header">
-                <div className="card-icon">📱</div>
-                <div>
-                  <h3>WhatsApp Process</h3>
-                  <p className="card-subtitle">How your order will be confirmed</p>
-                </div>
-              </div>
-              
-              <div className="card-content">
-                <div className="process-steps">
-                  <div className="process-step">
-                    <div className="step-number">1</div>
-                    <div className="step-info">
-                      <h4>Complete Form</h4>
-                      <p>Fill in all shipping details</p>
-                    </div>
-                  </div>
-                  <div className="process-step">
-                    <div className="step-number">2</div>
-                    <div className="step-info">
-                      <h4>Select Payment</h4>
-                      <p>Choose payment method</p>
-                    </div>
-                  </div>
-                  <div className="process-step">
-                    <div className="step-number">3</div>
-                    <div className="step-info">
-                      <h4>Place Order</h4>
-                      <p>Submit and open WhatsApp</p>
-                    </div>
-                  </div>
-                  <div className="process-step">
-                    <div className="step-number">4</div>
-                    <div className="step-info">
-                      <h4>Get Confirmation</h4>
-                      <p>Team contacts you via WhatsApp</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="whatsapp-notice">
-                  <div className="notice-icon">💡</div>
-                  <p><strong>Keep WhatsApp open</strong> for real-time updates and faster processing.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Shipping Information */}
-          <div className="right-column">
-            <div className="shipping-card">
-              <div className="card-header">
-                <div className="card-icon">🚚</div>
-                <div>
-                  <h3>Shipping Information</h3>
-                  <p className="card-subtitle">Please provide your details for order processing</p>
-                </div>
-              </div>
-              
-              <div className="card-content">
-                {/* Shipping Form */}
-                <div className="shipping-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="name">
-                        Full Name *
-                        {errors.name && <span className="error-indicator">!</span>}
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className={errors.name ? 'error' : ''}
-                        placeholder="John Doe"
-                      />
-                      {errors.name && <span className="error-message">{errors.name}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email">
-                        Email Address *
-                        {errors.email && <span className="error-indicator">!</span>}
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={errors.email ? 'error' : ''}
-                        placeholder="john@example.com"
-                      />
-                      {errors.email && <span className="error-message">{errors.email}</span>}
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="phone">
-                      Phone Number *
-                      {errors.phone && <span className="error-indicator">!</span>}
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className={errors.phone ? 'error' : ''}
-                      placeholder="+501 661-1904"
-                    />
-                    {errors.phone && <span className="error-message">{errors.phone}</span>}
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="address">
-                      Shipping Address *
-                      {errors.address && <span className="error-indicator">!</span>}
-                    </label>
-                    <textarea
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className={errors.address ? 'error' : ''}
-                      placeholder="123 Main Street, Building Name, Apt/Unit #"
-                      rows="3"
-                    />
-                    {errors.address && <span className="error-message">{errors.address}</span>}
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="city">
-                        City *
-                        {errors.city && <span className="error-indicator">!</span>}
-                      </label>
-                      <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        className={errors.city ? 'error' : ''}
-                        placeholder="Belize City"
-                      />
-                      {errors.city && <span className="error-message">{errors.city}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="zipCode">
-                        ZIP Code *
-                        {errors.zipCode && <span className="error-indicator">!</span>}
-                      </label>
-                      <input
-                        type="text"
-                        id="zipCode"
-                        name="zipCode"
-                        value={formData.zipCode}
-                        onChange={handleChange}
-                        className={errors.zipCode ? 'error' : ''}
-                        placeholder="12345"
-                      />
-                      {errors.zipCode && <span className="error-message">{errors.zipCode}</span>}
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="notes">Order Notes (Optional)</label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleChange}
-                      placeholder="Special delivery instructions, gift wrapping requests, size preferences, etc."
-                      rows="3"
-                    />
-                    <small className="helper-text">Any special instructions for your order</small>
-                  </div>
-                </div>
-                
-                {/* Order Total & Submit Button */}
-                <div className="order-total-section">
-                  <div className="total-display">
-                    <div className="total-label">Order Total</div>
-                    <div className="total-amount">${total.toFixed(2)}</div>
-                  </div>
-                  
-                  <button 
-                    type="submit" 
-                    className="submit-order-btn"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="spinner"></span>
-                        Processing Order...
-                      </>
-                    ) : (
-                      <>
-                        <span className="btn-icon">📱</span>
-                        Place Order & Open WhatsApp
-                        <span className="btn-arrow">→</span>
-                      </>
-                    )}
-                  </button>
-                  
-                  <div className="security-notice">
-                    <div className="security-icon">🔒</div>
-                    <p>Your information is secure. No payment is processed on this site.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <LeftColumn 
+            cart={cart}
+            total={total}
+            itemCount={itemCount}
+            paymentOptions={PAYMENT_OPTIONS}
+            selectedPayment={formData.paymentMethod}
+            onPaymentChange={handleChange}
+            currentPaymentOption={currentPaymentOption}
+          />
+          
+          <RightColumn 
+            formData={formData}
+            errors={errors}
+            total={total}
+            isSubmitting={isSubmitting}
+            onChange={handleChange}
+          />
         </form>
       </div>
     </div>
   );
 };
+
+// ============================================================================
+// ORDER CONFIRMATION COMPONENTS
+// ============================================================================
+
+/**
+ * Order Confirmation Page
+ */
+const OrderConfirmation = ({ orderDetails, onContinue, onPrint }) => (
+  <div className="order-confirmation-page">
+    <div className="confirmation-container">
+      <div className="success-animation">🎉</div>
+      <h1>Order Confirmed!</h1>
+      <p className="confirmation-message">
+        Thank you for your order, {orderDetails?.name}! 
+        Your Karibbean Dealz order #{orderDetails?.orderId} has been received.
+      </p>
+      
+      <OrderDetailsSummary details={orderDetails} />
+      <NextSteps phone={orderDetails?.phone} />
+      
+      <div className="confirmation-actions">
+        <button onClick={onContinue} className="btn btn-primary">
+          Continue Shopping
+        </button>
+        <button onClick={onPrint} className="btn btn-outline">
+          Print Order Summary
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+/**
+ * Order Details Summary
+ */
+const OrderDetailsSummary = ({ details }) => details && (
+  <div className="order-details">
+    <h2>📋 Order Details</h2>
+    <div className="details-grid">
+      <DetailItem label="Order ID" value={details.orderId} />
+      <DetailItem label="Total Amount" value={`$${details.total.toFixed(2)}`} />
+      <DetailItem label="Items" value={details.items} />
+      <DetailItem label="Shipping to" value={details.address} />
+    </div>
+  </div>
+);
+
+/**
+ * Next Steps Section
+ */
+const NextSteps = ({ phone }) => (
+  <div className="next-steps">
+    <h3>📱 What happens next?</h3>
+    <div className="steps-container">
+      <StepItem 
+        number={1}
+        title="Payment Confirmation"
+        description={`Our team will contact you via WhatsApp at ${phone} to confirm payment method`}
+      />
+      <StepItem 
+        number={2}
+        title="Order Processing"
+        description="Once payment is confirmed, we'll prepare your order for shipment"
+      />
+      <StepItem 
+        number={3}
+        title="Shipping & Tracking"
+        description="You'll receive tracking information via email once your order ships"
+      />
+    </div>
+  </div>
+);
+
+/**
+ * Step Item
+ */
+const StepItem = ({ number, title, description }) => (
+  <div className="step-item">
+    <div className="step-number">{number}</div>
+    <div className="step-content">
+      <h4>{title}</h4>
+      <p>{description}</p>
+    </div>
+  </div>
+);
+
+/**
+ * Detail Item
+ */
+const DetailItem = ({ label, value }) => (
+  <div className="detail-item">
+    <span className="detail-label">{label}:</span>
+    <span className="detail-value">{value}</span>
+  </div>
+);
+
+// ============================================================================
+// EMPTY CART COMPONENT
+// ============================================================================
+
+const EmptyCart = () => (
+  <div className="empty-cart-page">
+    <div className="empty-cart-content">
+      <div className="empty-cart-icon">🛒</div>
+      <h1>Your Shopping Cart is Empty</h1>
+      <p>Add some amazing products to your cart before proceeding to checkout.</p>
+      <a href="/products" className="btn btn-primary">Browse Products</a>
+    </div>
+  </div>
+);
+
+// ============================================================================
+// CHECKOUT HEADER AND PROGRESS
+// ============================================================================
+
+const CheckoutHeader = () => (
+  <div className="checkout-header">
+    <h1>🛍️ Checkout</h1>
+    <p>Complete your purchase in a few simple steps</p>
+  </div>
+);
+
+const CheckoutProgress = ({ currentStep }) => {
+  const steps = [
+    { title: 'Review Cart', status: 'Current' },
+    { title: 'Shipping Info', status: 'Next' },
+    { title: 'Place Order', status: 'Final' }
+  ];
+
+  return (
+    <div className="checkout-progress">
+      {steps.map((step, index) => (
+        <ProgressStep 
+          key={index}
+          number={index + 1}
+          title={step.title}
+          status={step.status}
+          isActive={index + 1 === currentStep}
+        />
+      ))}
+    </div>
+  );
+};
+
+const ProgressStep = ({ number, title, status, isActive }) => (
+  <div className={`progress-step ${isActive ? 'active' : ''}`}>
+    <div className="step-number">{number}</div>
+    <div className="step-info">
+      <div className="step-title">{title}</div>
+      <div className="step-status">{status}</div>
+    </div>
+  </div>
+);
+
+// ============================================================================
+// LEFT COLUMN COMPONENTS
+// ============================================================================
+
+const LeftColumn = ({ 
+  cart, total, itemCount, paymentOptions, 
+  selectedPayment, onPaymentChange, currentPaymentOption 
+}) => (
+  <div className="left-column">
+    <OrderSummaryCard 
+      cart={cart}
+      total={total}
+      itemCount={itemCount}
+    />
+    
+    <PaymentMethodCard 
+      paymentOptions={paymentOptions}
+      selectedPayment={selectedPayment}
+      onPaymentChange={onPaymentChange}
+      currentPaymentOption={currentPaymentOption}
+    />
+    
+    <WhatsAppProcessCard />
+  </div>
+);
+
+const OrderSummaryCard = ({ cart, total, itemCount }) => (
+  <div className="order-summary-card">
+    <CardHeader icon="📦" title="Order Summary" subtitle={`${itemCount} ${itemCount === 1 ? 'item' : 'items'}`} />
+    
+    <div className="card-content">
+      <div className="order-items">
+        {cart.map(item => (
+          <OrderItem key={item.id} item={item} />
+        ))}
+      </div>
+      
+      <OrderTotals total={total} />
+      
+      <div className="order-notice">
+        <div className="notice-icon">ℹ️</div>
+        <p>Shipping costs will be confirmed via WhatsApp after order placement.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const OrderItem = ({ item }) => (
+  <div className="order-item">
+    <div className="item-image">
+      <img src={item.image || '/placeholder-item.jpg'} alt={item.name} />
+      <span className="quantity-badge">{item.quantity}</span>
+    </div>
+    <div className="item-info">
+      <h4 className="item-name">{item.name}</h4>
+      <p className="item-price">${item.price.toFixed(2)} each</p>
+    </div>
+    <div className="item-total">
+      ${(item.price * item.quantity).toFixed(2)}
+    </div>
+  </div>
+);
+
+const OrderTotals = ({ total }) => (
+  <div className="order-totals">
+    <TotalRow label="Subtotal" value={`$${total.toFixed(2)}`} />
+    <TotalRow label="Shipping" value="Calculated after order" className="shipping-note" />
+    <TotalRow label="Tax" value="$0.00" />
+    <TotalRow label="Total" value={`$${total.toFixed(2)}`} className="grand-total" valueClass="total-amount" />
+  </div>
+);
+
+const TotalRow = ({ label, value, className = '', valueClass = '' }) => (
+  <div className={`total-row ${className}`}>
+    <span>{label}</span>
+    <span className={valueClass}>{value}</span>
+  </div>
+);
+
+const PaymentMethodCard = ({ paymentOptions, selectedPayment, onPaymentChange, currentPaymentOption }) => (
+  <div className="payment-method-card">
+    <CardHeader icon="💳" title="Payment Method" subtitle="Select how you'd like to pay" />
+    
+    <div className="card-content">
+      <div className="payment-options">
+        {paymentOptions.map(option => (
+          <PaymentOption 
+            key={option.id}
+            option={option}
+            isSelected={selectedPayment === option.id}
+            onChange={onPaymentChange}
+          />
+        ))}
+      </div>
+      
+      {currentPaymentOption && (
+        <div className="payment-notice">
+          <div className="notice-icon">ℹ️</div>
+          <p>{currentPaymentOption.notice}</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const PaymentOption = ({ option, isSelected, onChange }) => (
+  <label className={`payment-option ${isSelected ? 'selected' : ''}`}>
+    <input
+      type="radio"
+      name="paymentMethod"
+      value={option.id}
+      checked={isSelected}
+      onChange={onChange}
+      className="payment-radio"
+    />
+    <div className="payment-content">
+      <div className="payment-icon">{option.icon}</div>
+      <div className="payment-info">
+        <div className="payment-title">{option.label}</div>
+        <div className="payment-description">{option.description}</div>
+      </div>
+    </div>
+  </label>
+);
+
+const WhatsAppProcessCard = () => (
+  <div className="whatsapp-card">
+    <CardHeader icon="📱" title="WhatsApp Process" subtitle="How your order will be confirmed" />
+    
+    <div className="card-content">
+      <div className="process-steps">
+        <ProcessStep number={1} title="Complete Form" description="Fill in all shipping details" />
+        <ProcessStep number={2} title="Select Payment" description="Choose payment method" />
+        <ProcessStep number={3} title="Place Order" description="Submit and open WhatsApp" />
+        <ProcessStep number={4} title="Get Confirmation" description="Team contacts you via WhatsApp" />
+      </div>
+      
+      <div className="whatsapp-notice">
+        <div className="notice-icon">💡</div>
+        <p><strong>Keep WhatsApp open</strong> for real-time updates and faster processing.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const ProcessStep = ({ number, title, description }) => (
+  <div className="process-step">
+    <div className="step-number">{number}</div>
+    <div className="step-info">
+      <h4>{title}</h4>
+      <p>{description}</p>
+    </div>
+  </div>
+);
+
+// ============================================================================
+// RIGHT COLUMN COMPONENTS
+// ============================================================================
+
+const RightColumn = ({ formData, errors, total, isSubmitting, onChange }) => (
+  <div className="right-column">
+    <div className="shipping-card">
+      <CardHeader icon="🚚" title="Shipping Information" subtitle="Please provide your details for order processing" />
+      
+      <div className="card-content">
+        <ShippingForm formData={formData} errors={errors} onChange={onChange} />
+        <OrderSubmitSection total={total} isSubmitting={isSubmitting} />
+      </div>
+    </div>
+  </div>
+);
+
+const ShippingForm = ({ formData, errors, onChange }) => (
+  <div className="shipping-form">
+    <div className="form-row">
+      <FormField
+        id="name"
+        label="Full Name"
+        value={formData.name}
+        error={errors.name}
+        onChange={onChange}
+        placeholder="John Doe"
+        required
+      />
+      
+      <FormField
+        id="email"
+        label="Email Address"
+        type="email"
+        value={formData.email}
+        error={errors.email}
+        onChange={onChange}
+        placeholder="john@example.com"
+        required
+      />
+    </div>
+
+    <FormField
+      id="phone"
+      label="Phone Number"
+      type="tel"
+      value={formData.phone}
+      error={errors.phone}
+      onChange={onChange}
+      placeholder="+501 661-1904"
+      required
+    />
+
+    <FormField
+      id="address"
+      label="Shipping Address"
+      type="textarea"
+      value={formData.address}
+      error={errors.address}
+      onChange={onChange}
+      placeholder="123 Main Street, Building Name, Apt/Unit #"
+      rows="3"
+      required
+    />
+
+    <div className="form-row">
+      <FormField
+        id="city"
+        label="City"
+        value={formData.city}
+        error={errors.city}
+        onChange={onChange}
+        placeholder="Belize City"
+        required
+      />
+      
+      <FormField
+        id="zipCode"
+        label="ZIP Code"
+        value={formData.zipCode}
+        error={errors.zipCode}
+        onChange={onChange}
+        placeholder="12345"
+        required
+      />
+    </div>
+
+    <FormField
+      id="notes"
+      label="Order Notes (Optional)"
+      type="textarea"
+      value={formData.notes}
+      onChange={onChange}
+      placeholder="Special delivery instructions, gift wrapping requests, size preferences, etc."
+      rows="3"
+      helperText="Any special instructions for your order"
+    />
+  </div>
+);
+
+const FormField = ({ 
+  id, label, type = 'text', value, error, 
+  onChange, placeholder, rows, required, helperText 
+}) => (
+  <div className="form-group">
+    <label htmlFor={id}>
+      {label} {required && '*'}
+      {error && <span className="error-indicator">!</span>}
+    </label>
+    
+    {type === 'textarea' ? (
+      <textarea
+        id={id}
+        name={id}
+        value={value}
+        onChange={onChange}
+        className={error ? 'error' : ''}
+        placeholder={placeholder}
+        rows={rows}
+        required={required}
+      />
+    ) : (
+      <input
+        type={type}
+        id={id}
+        name={id}
+        value={value}
+        onChange={onChange}
+        className={error ? 'error' : ''}
+        placeholder={placeholder}
+        required={required}
+      />
+    )}
+    
+    {error && <span className="error-message">{error}</span>}
+    {helperText && !error && <small className="helper-text">{helperText}</small>}
+  </div>
+);
+
+const OrderSubmitSection = ({ total, isSubmitting }) => (
+  <div className="order-total-section">
+    <div className="total-display">
+      <div className="total-label">Order Total</div>
+      <div className="total-amount">${total.toFixed(2)}</div>
+    </div>
+    
+    <SubmitButton isSubmitting={isSubmitting} />
+    
+    <SecurityNotice />
+  </div>
+);
+
+const SubmitButton = ({ isSubmitting }) => (
+  <button type="submit" className="submit-order-btn" disabled={isSubmitting}>
+    {isSubmitting ? (
+      <>
+        <span className="spinner"></span>
+        Processing Order...
+      </>
+    ) : (
+      <>
+        <span className="btn-icon">📱</span>
+        Place Order & Open WhatsApp
+        <span className="btn-arrow">→</span>
+      </>
+    )}
+  </button>
+);
+
+const SecurityNotice = () => (
+  <div className="security-notice">
+    <div className="security-icon">🔒</div>
+    <p>Your information is secure. No payment is processed on this site.</p>
+  </div>
+);
+
+// ============================================================================
+// COMMON COMPONENTS
+// ============================================================================
+
+const CardHeader = ({ icon, title, subtitle }) => (
+  <div className="card-header">
+    <div className="card-icon">{icon}</div>
+    <div>
+      <h3>{title}</h3>
+      <p className="card-subtitle">{subtitle}</p>
+    </div>
+  </div>
+);
 
 export default CheckoutPage;
