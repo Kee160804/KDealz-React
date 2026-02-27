@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import '../styles/ProductCard.css';
+import React, { useState, useCallback, useMemo } from "react";
+import "../styles/ProductCard.css";
+import { supabase } from "../lib/supabase/client";
 
 /**
  * ProductCard Component
@@ -7,34 +8,36 @@ import '../styles/ProductCard.css';
  * Supports size variants for footwear and apparel categories
  */
 const ProductCard = ({ product, addToCart }) => {
+  console.log(product);
   // Local state
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedSize, setSelectedSize] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
   /**
    * Category color mapping for visual differentiation
    */
   const CATEGORY_COLORS = {
-    'beauty-bodycare': '#f1c40f',
-    'bathroom-essentials': '#3498db',
-    'footwear': '#e67e22',
-    'home-living': '#9b59b6',
-    'electronics': '#34495e',
-    'apparel': '#e74c3c',
-    'mens-clothing': '#3498db',
-    'womens-clothing': '#e74c3c',
-    'accessories': '#1abc9c'
+    "beauty-bodycare": "#f1c40f",
+    "bathroom-essentials": "#3498db",
+    footwear: "#e67e22",
+    "home-living": "#9b59b6",
+    electronics: "#34495e",
+    apparel: "#e74c3c",
+    "mens-clothing": "#3498db",
+    "womens-clothing": "#e74c3c",
+    accessories: "#1abc9c",
   };
 
   /**
    * Determine if product requires size selection
    * Only footwear and apparel with sizes array need size picker
    */
-  const requiresSizeSelection = useMemo(() => 
-    (product.category === "footwear" || product.category === "apparel") && 
-    product.sizes?.length > 0,
-    [product.category, product.sizes]
+  const requiresSizeSelection = useMemo(
+    () =>
+      (product.category === "footwear" || product.category === "apparel") &&
+      product.sizes?.length > 0,
+    [product.category, product.sizes],
   );
 
   /**
@@ -45,7 +48,12 @@ const ProductCard = ({ product, addToCart }) => {
       return product.availableSizes[selectedSize] || 0;
     }
     return product.stock || 0;
-  }, [requiresSizeSelection, selectedSize, product.availableSizes, product.stock]);
+  }, [
+    requiresSizeSelection,
+    selectedSize,
+    product.availableSizes,
+    product.stock,
+  ]);
 
   /**
    * Validate if product can be added to cart
@@ -53,42 +61,52 @@ const ProductCard = ({ product, addToCart }) => {
    */
   const validateAddToCart = useCallback(() => {
     if (quantity < 1) {
-      return { isValid: false, message: 'Please select at least 1 item' };
+      return { isValid: false, message: "Please select at least 1 item" };
     }
 
     const availableStock = getAvailableStock();
     if (quantity > availableStock) {
-      const message = requiresSizeSelection && selectedSize
-        ? `Only ${availableStock} available in size ${selectedSize}`
-        : `Only ${availableStock} items available in stock`;
+      const message =
+        requiresSizeSelection && selectedSize
+          ? `Only ${availableStock} available in size ${selectedSize}`
+          : `Only ${availableStock} items available in stock`;
       return { isValid: false, message };
     }
 
     if (requiresSizeSelection && !selectedSize) {
-      return { isValid: false, message: `Please select a size for ${product.name}` };
+      return {
+        isValid: false,
+        message: `Please select a size for ${product.name}`,
+      };
     }
 
     return { isValid: true };
-  }, [quantity, selectedSize, product.name, requiresSizeSelection, getAvailableStock]);
+  }, [
+    quantity,
+    selectedSize,
+    product.name,
+    requiresSizeSelection,
+    getAvailableStock,
+  ]);
 
   /**
    * Handle add to cart action with validation
    */
   const handleAddToCart = useCallback(() => {
     const validation = validateAddToCart();
-    
+
     if (!validation.isValid) {
       alert(validation.message);
       return;
     }
 
     addToCart(product, quantity, selectedSize);
-    
+
     // Show success feedback
     setShowSuccess(true);
     setQuantity(1);
-    setSelectedSize('');
-    
+    setSelectedSize("");
+
     // Auto-hide success message
     setTimeout(() => setShowSuccess(false), 3000);
   }, [product, quantity, selectedSize, addToCart, validateAddToCart]);
@@ -96,69 +114,74 @@ const ProductCard = ({ product, addToCart }) => {
   /**
    * Handle quantity input change
    */
-  const handleQuantityChange = useCallback((e) => {
-    const value = parseInt(e.target.value);
-    const maxStock = getAvailableStock();
-    
-    if (!isNaN(value) && value >= 1 && value <= maxStock) {
-      setQuantity(value);
-    }
-  }, [getAvailableStock]);
+  const handleQuantityChange = useCallback(
+    (e) => {
+      const value = parseInt(e.target.value);
+      const maxStock = getAvailableStock();
+
+      if (!isNaN(value) && value >= 1 && value <= maxStock) {
+        setQuantity(value);
+      }
+    },
+    [getAvailableStock],
+  );
 
   /**
    * Increment quantity by 1
    */
   const incrementQuantity = useCallback(() => {
-    setQuantity(prev => Math.min(prev + 1, getAvailableStock()));
+    setQuantity((prev) => Math.min(prev + 1, getAvailableStock()));
   }, [getAvailableStock]);
 
   /**
    * Decrement quantity by 1
    */
   const decrementQuantity = useCallback(() => {
-    setQuantity(prev => Math.max(prev - 1, 1));
+    setQuantity((prev) => Math.max(prev - 1, 1));
   }, []);
 
   /**
    * Get category color with fallback
    */
-  const getCategoryColor = useCallback(() => 
-    CATEGORY_COLORS[product.category] || '#2c3e50',
-    [product.category]
+  const getCategoryColor = useCallback(
+    () => CATEGORY_COLORS[product.category] || "#2c3e50",
+    [product.category],
   );
 
   /**
    * Handle image load error - fallback to placeholder
    */
-  const handleImageError = useCallback((e) => {
-    e.target.onerror = null;
-    e.target.src = `https://via.placeholder.com/300x300/${getCategoryColor().replace('#', '')}/ffffff?text=${encodeURIComponent(product.name)}`;
-  }, [product.name, getCategoryColor]);
+  const handleImageError = useCallback(
+    (e) => {
+      e.target.onerror = null;
+      e.target.src = `https://via.placeholder.com/300x300/${getCategoryColor().replace("#", "")}/ffffff?text=${encodeURIComponent(product.name)}`;
+    },
+    [product.name, getCategoryColor],
+  );
 
   const availableStock = getAvailableStock();
-  const isOutOfStock = product.stock === 0 || (requiresSizeSelection && selectedSize && availableStock === 0);
+  const isOutOfStock =
+    product.stock === 0 ||
+    (requiresSizeSelection && selectedSize && availableStock === 0);
   const categoryColor = getCategoryColor();
 
   return (
     <article className="product-card" aria-label={`Product: ${product.name}`}>
-      <ProductImage 
+      <ProductImage
         product={product}
         categoryColor={categoryColor}
         onImageError={handleImageError}
         isOutOfStock={isOutOfStock}
       />
-      
+
       <div className="product-info">
-        <ProductHeader 
-          product={product}
-          categoryColor={categoryColor}
-        />
-        
+        <ProductHeader product={product} categoryColor={categoryColor} />
+
         <ProductMeta product={product} />
-        
+
         {/* Size Selector for Footwear and Apparel */}
         {requiresSizeSelection && (
-          <SizeSelector 
+          <SizeSelector
             sizes={product.sizes}
             availableSizes={product.availableSizes}
             selectedSize={selectedSize}
@@ -166,7 +189,7 @@ const ProductCard = ({ product, addToCart }) => {
           />
         )}
 
-        <QuantityControls 
+        <QuantityControls
           quantity={quantity}
           maxStock={availableStock}
           onIncrement={incrementQuantity}
@@ -175,7 +198,7 @@ const ProductCard = ({ product, addToCart }) => {
           isOutOfStock={isOutOfStock}
         />
 
-        <AddToCartButton 
+        <AddToCartButton
           onClick={handleAddToCart}
           isOutOfStock={isOutOfStock}
           requiresSizeSelection={requiresSizeSelection}
@@ -183,7 +206,7 @@ const ProductCard = ({ product, addToCart }) => {
         />
 
         {showSuccess && (
-          <SuccessMessage 
+          <SuccessMessage
             quantity={quantity}
             productName={product.name}
             selectedSize={selectedSize}
@@ -197,23 +220,22 @@ const ProductCard = ({ product, addToCart }) => {
 /**
  * Product Image Subcomponent
  */
-const ProductImage = ({ product, categoryColor, onImageError, isOutOfStock }) => (
+const ProductImage = ({
+  product,
+  categoryColor,
+  onImageError,
+  isOutOfStock,
+}) => (
   <div className="product-image-container">
-    <img 
-      src={product.image} 
+    <img
+      src={product.image}
       alt={product.name}
       className="product-image"
       onError={onImageError}
       loading="lazy"
     />
-    <CategoryTag 
-      category={product.category} 
-      color={categoryColor} 
-    />
-    <StockBadge 
-      stock={product.stock} 
-      isOutOfStock={isOutOfStock} 
-    />
+    <CategoryTag category={product.category} color={categoryColor} />
+    <StockBadge stock={product.stock} isOutOfStock={isOutOfStock} />
   </div>
 );
 
@@ -221,11 +243,8 @@ const ProductImage = ({ product, categoryColor, onImageError, isOutOfStock }) =>
  * Category Tag Subcomponent
  */
 const CategoryTag = ({ category, color }) => (
-  <span 
-    className="category-tag"
-    style={{ backgroundColor: color }}
-  >
-    {category.replace('-', ' ')}
+  <span className="category-tag" style={{ backgroundColor: color }}>
+    {category?.replace("-", " ")}
   </span>
 );
 
@@ -257,8 +276,10 @@ const ProductMeta = ({ product }) => (
     <span className="product-price">${product.price.toFixed(2)}</span>
     {product.tags?.length > 0 && (
       <div className="tags">
-        {product.tags.map(tag => (
-          <span key={tag} className="tag">{tag}</span>
+        {product.tags.map((tag) => (
+          <span key={tag} className="tag">
+            {tag}
+          </span>
         ))}
       </div>
     )}
@@ -268,17 +289,22 @@ const ProductMeta = ({ product }) => (
 /**
  * Size Selector Subcomponent
  */
-const SizeSelector = ({ sizes, availableSizes, selectedSize, onSizeSelect }) => (
+const SizeSelector = ({
+  sizes,
+  availableSizes,
+  selectedSize,
+  onSizeSelect,
+}) => (
   <div className="size-selector">
     <label className="size-label">Select Size:</label>
     <div className="size-options" role="group" aria-label="Size options">
-      {sizes.map(size => {
+      {sizes.map((size) => {
         const stockCount = availableSizes?.[size] || 0;
         const isAvailable = stockCount > 0;
         const isSelected = selectedSize === size;
-        
+
         return (
-          <SizeOption 
+          <SizeOption
             key={size}
             size={size}
             isAvailable={isAvailable}
@@ -290,9 +316,9 @@ const SizeSelector = ({ sizes, availableSizes, selectedSize, onSizeSelect }) => 
       })}
     </div>
     {selectedSize && availableSizes && (
-      <SizeStockInfo 
-        size={selectedSize} 
-        stockCount={availableSizes[selectedSize]} 
+      <SizeStockInfo
+        size={selectedSize}
+        stockCount={availableSizes[selectedSize]}
       />
     )}
   </div>
@@ -301,18 +327,30 @@ const SizeSelector = ({ sizes, availableSizes, selectedSize, onSizeSelect }) => 
 /**
  * Individual Size Option Button
  */
-const SizeOption = ({ size, isAvailable, isSelected, stockCount, onSelect }) => (
+const SizeOption = ({
+  size,
+  isAvailable,
+  isSelected,
+  stockCount,
+  onSelect,
+}) => (
   <button
     type="button"
-    className={`size-option ${isSelected ? 'selected' : ''} ${!isAvailable ? 'out-of-stock' : ''}`}
+    className={`size-option ${isSelected ? "selected" : ""} ${!isAvailable ? "out-of-stock" : ""}`}
     onClick={onSelect}
     disabled={!isAvailable}
-    title={isAvailable ? `Size ${size} - ${stockCount} available` : 'Out of stock'}
-    aria-label={`Size ${size}${isAvailable ? `, ${stockCount} available` : ', out of stock'}`}
+    title={
+      isAvailable ? `Size ${size} - ${stockCount} available` : "Out of stock"
+    }
+    aria-label={`Size ${size}${isAvailable ? `, ${stockCount} available` : ", out of stock"}`}
     aria-pressed={isSelected}
   >
     {size}
-    {!isAvailable && <span className="size-stock-badge" aria-hidden="true">X</span>}
+    {!isAvailable && (
+      <span className="size-stock-badge" aria-hidden="true">
+        X
+      </span>
+    )}
   </button>
 );
 
@@ -328,17 +366,17 @@ const SizeStockInfo = ({ size, stockCount }) => (
 /**
  * Quantity Controls Subcomponent
  */
-const QuantityControls = ({ 
-  quantity, 
-  maxStock, 
-  onIncrement, 
-  onDecrement, 
-  onChange, 
-  isOutOfStock 
+const QuantityControls = ({
+  quantity,
+  maxStock,
+  onIncrement,
+  onDecrement,
+  onChange,
+  isOutOfStock,
 }) => (
   <div className="quantity-selector">
     <div className="quantity-control">
-      <QuantityButton 
+      <QuantityButton
         onClick={onDecrement}
         disabled={quantity <= 1 || isOutOfStock}
         label="Decrease quantity"
@@ -354,7 +392,7 @@ const QuantityControls = ({
         disabled={isOutOfStock}
         aria-label="Quantity"
       />
-      <QuantityButton 
+      <QuantityButton
         onClick={onIncrement}
         disabled={quantity >= maxStock || isOutOfStock}
         label="Increase quantity"
@@ -368,7 +406,7 @@ const QuantityControls = ({
  * Quantity Button Subcomponent
  */
 const QuantityButton = ({ onClick, disabled, label, symbol }) => (
-  <button 
+  <button
     className="quantity-btn"
     onClick={onClick}
     disabled={disabled}
@@ -382,31 +420,31 @@ const QuantityButton = ({ onClick, disabled, label, symbol }) => (
 /**
  * Add to Cart Button Subcomponent
  */
-const AddToCartButton = ({ 
-  onClick, 
-  isOutOfStock, 
-  requiresSizeSelection, 
-  hasSelectedSize 
+const AddToCartButton = ({
+  onClick,
+  isOutOfStock,
+  requiresSizeSelection,
+  hasSelectedSize,
 }) => {
   const getButtonState = () => {
     if (isOutOfStock) {
       return {
-        text: 'Out of Stock',
+        text: "Out of Stock",
         disabled: true,
-        className: 'out-of-stock'
+        className: "out-of-stock",
       };
     }
     if (requiresSizeSelection && !hasSelectedSize) {
       return {
-        text: 'Select Size',
+        text: "Select Size",
         disabled: true,
-        className: 'disabled'
+        className: "disabled",
       };
     }
     return {
-      text: 'Add to Cart',
+      text: "Add to Cart",
       disabled: false,
-      className: ''
+      className: "",
     };
   };
 
@@ -429,7 +467,7 @@ const AddToCartButton = ({
  */
 const SuccessMessage = ({ quantity, productName, selectedSize }) => (
   <div className="success-message" role="status" aria-live="polite">
-    ✓ Added {quantity} {productName} 
+    ✓ Added {quantity} {productName}
     {selectedSize && ` (Size: ${selectedSize})`} to cart!
   </div>
 );
