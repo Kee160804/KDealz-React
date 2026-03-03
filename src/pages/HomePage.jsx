@@ -234,6 +234,7 @@ const DotButton = ({ index, isActive, onClick }) => (
 
 const CategoriesSection = () => (
   <section className="categories-section">
+    test
     <CategoryList />
   </section>
 );
