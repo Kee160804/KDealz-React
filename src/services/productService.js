@@ -146,23 +146,192 @@
 
 
 
+// // services/productService.js
+// import { supabase } from '../lib/supabase/client';
+
+// const enhanceProduct = (product) => {
+//   return {
+//     ...product,
+//     // Add cost field (default to 60% of price if not present)
+//     cost: product.cost !== undefined ? product.cost : parseFloat((product.price * 0.6).toFixed(2)),
+//     // Add SKU field (generate from name and id if not present)
+//     sku: product.sku || `${product.category?.substring(0, 3).toUpperCase() || 'PRD'}-${String(product.id).padStart(3, '0')}`,
+//     // Ensure tags is always an array
+//     tags: product.tags || []
+//   };
+// };
+
+// // Helper to transform raw Supabase product (parses JSON fields and adds defaults)
+// const transformProduct = (rawProduct) => {
+//   let sizes = [];
+//   if (rawProduct.sizes) {
+//     if (typeof rawProduct.sizes === 'string') {
+//       try {
+//         sizes = JSON.parse(rawProduct.sizes);
+//       } catch {
+//         sizes = rawProduct.sizes.split(',').map(s => s.trim());
+//       }
+//     } else if (Array.isArray(rawProduct.sizes)) {
+//       sizes = rawProduct.sizes;
+//     }
+//   }
+
+//   let availableSizes = {};
+//   if (rawProduct.available_Sizes) {
+//     if (typeof rawProduct.available_Sizes === 'string') {
+//       try {
+//         availableSizes = JSON.parse(rawProduct.available_Sizes);
+//       } catch (e) {
+//         console.warn('Failed to parse available_Sizes for product', rawProduct.id, e);
+//       }
+//     } else if (typeof rawProduct.available_Sizes === 'object') {
+//       availableSizes = rawProduct.available_Sizes;
+//     }
+//   }
+
+//   // Build the product object with flattened fields
+//   const product = {
+//     ...rawProduct,
+//     stock: rawProduct.stock_quantity,
+//     sizes,
+//     availableSizes,
+//   };
+
+//   // Add default cost, SKU, tags (these may not be in DB, so we compute)
+//   return enhanceProduct(product);
+// };
+
+// // Get all products
+// export const getAllProducts = async () => {
+//   const { data, error } = await supabase
+//     .from('products')
+//     .select('*');
+//   if (error) throw error;
+//   return (data || []).map(transformProduct);
+// };
+
+// // Get product by ID
+// export const getProductById = async (id) => {
+//   const { data, error } = await supabase
+//     .from('products')
+//     .select('*')
+//     .eq('id', id)
+//     .single();
+//   if (error) throw error;
+//   return data ? transformProduct(data) : null;
+// };
+
+// // Add new product
+// export const addProduct = async (product) => {
+//   // Ensure required fields are present
+//   const newProduct = {
+//     ...product,
+//     id: undefined, // let Supabase generate ID (or keep if you want to set manually)
+//     // cost and sku are already set in product (from admin form)
+//     // sizes and available_Sizes should already be JSON strings or null
+//   };
+
+//   const { data, error } = await supabase
+//     .from('products')
+//     .insert([newProduct])
+//     .select();
+//   if (error) throw error;
+//   return data[0] ? transformProduct(data[0]) : null;
+// };
+
+// // Update product
+// export const updateProduct = async (id, updates) => {
+//   const { data, error } = await supabase
+//     .from('products')
+//     .update(updates)
+//     .eq('id', id)
+//     .select();
+//   if (error) throw error;
+//   return data[0] ? transformProduct(data[0]) : null;
+// };
+
+// // Delete product
+// export const deleteProduct = async (id) => {
+//   const { error } = await supabase
+//     .from('products')
+//     .delete()
+//     .eq('id', id);
+//   if (error) throw error;
+//   return id;
+// };
+
+// // Update stock (convenience function)
+// export const updateStock = async (id, newStock) => {
+//   const { data, error } = await supabase
+//     .from('products')
+//     .update({ stock_quantity: newStock })
+//     .eq('id', id)
+//     .select();
+//   if (error) throw error;
+//   return data[0] ? transformProduct(data[0]) : null;
+// };
+
+// // Calls the callback whenever products change (insert, update, delete)
+// export const subscribeToProducts = (callback) => {
+//   // 1. Fetch initial data and call callback
+//   getAllProducts().then(callback).catch(console.error);
+
+//   // 2. Set up real‑time subscription
+//   const subscription = supabase
+//     .channel('products-changes')
+//     .on(
+//       'postgres_changes',
+//       { event: '*', schema: 'public', table: 'products' },
+//       async (payload) => {
+//         // When any change occurs, fetch the full updated list
+//         const { data, error } = await supabase.from('products').select('*');
+//         if (!error && data) {
+//           callback(data.map(transformProduct));
+//         } else {
+//           console.error('Error fetching products after change:', error);
+//         }
+//       }
+//     )
+//     .subscribe();
+
+//   // Return unsubscribe function
+//   return () => {
+//     supabase.removeChannel(subscription);
+//   };
+// };
+
+// // (Optional) If you need to manually trigger an update, you can use the channel
+// // but not necessary because the subscription already listens to changes.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // services/productService.js
 import { supabase } from '../lib/supabase/client';
 
 const enhanceProduct = (product) => {
   return {
     ...product,
-    // Add cost field (default to 60% of price if not present)
     cost: product.cost !== undefined ? product.cost : parseFloat((product.price * 0.6).toFixed(2)),
-    // Add SKU field (generate from name and id if not present)
     sku: product.sku || `${product.category?.substring(0, 3).toUpperCase() || 'PRD'}-${String(product.id).padStart(3, '0')}`,
-    // Ensure tags is always an array
     tags: product.tags || []
   };
 };
 
-// Helper to transform raw Supabase product (parses JSON fields and adds defaults)
 const transformProduct = (rawProduct) => {
+  // Parse sizes array
   let sizes = [];
   if (rawProduct.sizes) {
     if (typeof rawProduct.sizes === 'string') {
@@ -176,91 +345,93 @@ const transformProduct = (rawProduct) => {
     }
   }
 
+  // Parse available_Sizes – use the actual column name (capital S) first
   let availableSizes = {};
-  if (rawProduct.available_Sizes) {
-    if (typeof rawProduct.available_Sizes === 'string') {
+  const availableSizesRaw = rawProduct.available_Sizes !== undefined
+    ? rawProduct.available_Sizes
+    : rawProduct.available_sizes; // fallback for any accidentally lowercase data
+
+  if (availableSizesRaw) {
+    if (typeof availableSizesRaw === 'string') {
       try {
-        availableSizes = JSON.parse(rawProduct.available_Sizes);
+        availableSizes = JSON.parse(availableSizesRaw);
       } catch (e) {
         console.warn('Failed to parse available_Sizes for product', rawProduct.id, e);
       }
-    } else if (typeof rawProduct.available_Sizes === 'object') {
-      availableSizes = rawProduct.available_Sizes;
+    } else if (typeof availableSizesRaw === 'object') {
+      availableSizes = availableSizesRaw;
     }
   }
 
-  // Build the product object with flattened fields
   const product = {
     ...rawProduct,
     stock: rawProduct.stock_quantity,
     sizes,
     availableSizes,
   };
-
-  // Add default cost, SKU, tags (these may not be in DB, so we compute)
   return enhanceProduct(product);
 };
 
-// Get all products
 export const getAllProducts = async () => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*');
+  const { data, error } = await supabase.from('products').select('*');
   if (error) throw error;
   return (data || []).map(transformProduct);
 };
 
-// Get product by ID
 export const getProductById = async (id) => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
   if (error) throw error;
   return data ? transformProduct(data) : null;
 };
 
-// Add new product
 export const addProduct = async (product) => {
-  // Ensure required fields are present
-  const newProduct = {
-    ...product,
-    id: undefined, // let Supabase generate ID (or keep if you want to set manually)
-    // cost and sku are already set in product (from admin form)
-    // sizes and available_Sizes should already be JSON strings or null
-  };
+  // Remove computed fields that should not be stored
+  const { cost, sku, tags, stock, availableSizes, ...dbFields } = product;
 
-  const { data, error } = await supabase
-    .from('products')
-    .insert([newProduct])
-    .select();
+  const payload = {
+    ...dbFields,
+    sizes: dbFields.sizes && Array.isArray(dbFields.sizes)
+      ? JSON.stringify(dbFields.sizes)
+      : null,
+    available_Sizes: dbFields.available_Sizes && typeof dbFields.available_Sizes === 'object'
+      ? JSON.stringify(dbFields.available_Sizes)
+      : null,
+  };
+  delete payload.id; // let Supabase generate it
+
+  const { data, error } = await supabase.from('products').insert([payload]).select();
   if (error) throw error;
   return data[0] ? transformProduct(data[0]) : null;
 };
 
-// Update product
 export const updateProduct = async (id, updates) => {
+  const { cost, sku, tags, stock, availableSizes, ...dbUpdates } = updates;
+
+  const payload = {
+    ...dbUpdates,
+    sizes: dbUpdates.sizes && Array.isArray(dbUpdates.sizes)
+      ? JSON.stringify(dbUpdates.sizes)
+      : null,
+    available_Sizes: dbUpdates.available_Sizes && typeof dbUpdates.available_Sizes === 'object'
+      ? JSON.stringify(dbUpdates.available_Sizes)
+      : null,
+  };
+
   const { data, error } = await supabase
     .from('products')
-    .update(updates)
+    .update(payload)
     .eq('id', id)
     .select();
   if (error) throw error;
   return data[0] ? transformProduct(data[0]) : null;
 };
 
-// Delete product
 export const deleteProduct = async (id) => {
-  const { error } = await supabase
-    .from('products')
-    .delete()
-    .eq('id', id);
+  const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) throw error;
   return id;
 };
 
-// Update stock (convenience function)
 export const updateStock = async (id, newStock) => {
   const { data, error } = await supabase
     .from('products')
@@ -271,41 +442,19 @@ export const updateStock = async (id, newStock) => {
   return data[0] ? transformProduct(data[0]) : null;
 };
 
-// Calls the callback whenever products change (insert, update, delete)
 export const subscribeToProducts = (callback) => {
-  // 1. Fetch initial data and call callback
   getAllProducts().then(callback).catch(console.error);
 
-  // 2. Set up real‑time subscription
   const subscription = supabase
     .channel('products-changes')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'products' },
-      async (payload) => {
-        // When any change occurs, fetch the full updated list
-        const { data, error } = await supabase.from('products').select('*');
-        if (!error && data) {
-          callback(data.map(transformProduct));
-        } else {
-          console.error('Error fetching products after change:', error);
-        }
-      }
-    )
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (!error && data) callback(data.map(transformProduct));
+    })
     .subscribe();
 
-  // Return unsubscribe function
-  return () => {
-    supabase.removeChannel(subscription);
-  };
+  return () => supabase.removeChannel(subscription);
 };
-
-// (Optional) If you need to manually trigger an update, you can use the channel
-// but not necessary because the subscription already listens to changes.
-
-
-
-
 
 
 
