@@ -270,8 +270,6 @@
 
 // export default App;
 
-
-
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
@@ -279,6 +277,7 @@ import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
 import CategoryPage from "./components/CategoryPage";
 import ContactPage from "./pages/ContactPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -474,6 +473,7 @@ function App() {
                 />
               }
             />
+            <Route path="/order/:orderId" element={<OrderDetailsPage />} />
             <Route
               path="/category/:categoryName"
               element={
