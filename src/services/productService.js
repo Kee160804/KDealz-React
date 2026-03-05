@@ -65,11 +65,12 @@ export const getProductById = async (id) => {
 };
 
 export const addProduct = async (product) => {
-  // Remove computed fields that should not be stored
-  const { cost, sku, tags, stock, availableSizes, ...dbFields } = product;
+  // Remove computed fields that should not be stored, but KEEP cost
+  const { sku, tags, stock, availableSizes, ...dbFields } = product;
 
   const payload = {
     ...dbFields,
+    cost: product.cost !== undefined ? product.cost : null, // Ensure cost is included
     sizes: typeof dbFields.sizes === 'string'
       ? dbFields.sizes
       : Array.isArray(dbFields.sizes)
@@ -89,10 +90,11 @@ export const addProduct = async (product) => {
 };
 
 export const updateProduct = async (id, updates) => {
-  const { cost, sku, tags, stock, availableSizes, ...dbUpdates } = updates;
+  const { sku, tags, stock, availableSizes, ...dbUpdates } = updates;
 
   const payload = {
     ...dbUpdates,
+    cost: updates.cost !== undefined ? updates.cost : dbUpdates.cost, // Ensure cost is included
     sizes: typeof dbUpdates.sizes === 'string'
       ? dbUpdates.sizes
       : Array.isArray(dbUpdates.sizes)

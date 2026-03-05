@@ -131,6 +131,7 @@ export const createOrder = async (orderData, cartItems) => {
       quantity: item.quantity,
       price: parseFloat(item.price),
       subtotal: parseFloat((item.price * item.quantity).toFixed(2)),
+      size: item.selectedSize || null, // Store size if available
     }));
 
     // Insert order items
@@ -158,7 +159,7 @@ export const createOrder = async (orderData, cartItems) => {
 
 /**
  * Get all orders for admin dashboard
- * @returns {Promise<Array>} - Array of all orders with items
+ * @returns {Promise<Array>} - Array of all orders with items and product details
  */
 export const getAllOrders = async () => {
   try {
@@ -171,21 +172,67 @@ export const getAllOrders = async () => {
 
     // Fetch all order items
     const orders = data || [];
+    console.log(`📦 Fetched ${orders.length} orders from database`);
+    
     const enrichedOrders = await Promise.all(
       orders.map(async (order) => {
-        const { data: itemsData } = await supabase
+        const { data: itemsData, error: itemsError } = await supabase
           .from("order_item")
           .select("*")
           .eq("order_id", order.id);
 
-        return {
+        if (itemsError) {
+          console.warn(`⚠️ Error fetching items for order ${order.id}:`, itemsError);
+        }
+        
+        console.log(`📋 Order ${order.id}: Found ${itemsData?.length || 0} items`);
+
+        // Fetch product details for each item to display name, size, etc.
+        const enrichedItems = await Promise.all(
+          (itemsData || []).map(async (item) => {
+            try {
+              const { data: product, error: productError } = await supabase
+                .from("products")
+                .select("name, price, sizes, available_Sizes")
+                .eq("id", item.product_id)
+                .single();
+
+              if (productError) {
+                console.warn(`⚠️ Product ${item.product_id} not found:`, productError);
+              } else {
+                console.log(`✅ Found product: ${product?.name} (ID: ${item.product_id})`);
+              }
+
+              return {
+                productId: item.product_id,
+                name: product?.name || "Unknown Product",
+                quantity: item.quantity,
+                price: item.price ? parseFloat(item.price) : 0,
+                subtotal: item.subtotal ? parseFloat(item.subtotal) : 0,
+                size: item.size || null, // If size was stored in order_item
+                sizes: product?.sizes || null,
+                available_Sizes: product?.available_Sizes || null,
+              };
+            } catch (err) {
+              console.error(`❌ Error enriching item ${item.product_id}:`, err);
+              return {
+                productId: item.product_id,
+                name: "Unknown Product",
+                quantity: item.quantity,
+                price: item.price ? parseFloat(item.price) : 0,
+                subtotal: item.subtotal ? parseFloat(item.subtotal) : 0,
+                size: item.size || null,
+              };
+            }
+          }),
+        );
+
+        // Ensure items is always an array
+        const itemsArray = Array.isArray(enrichedItems) ? enrichedItems : [];
+        
+        const enrichedOrder = {
           ...transformOrder(order),
-          items: (itemsData || []).map((item) => ({
-            productId: item.product_id,
-            quantity: item.quantity,
-            price: parseFloat(item.price),
-            subtotal: parseFloat(item.subtotal),
-          })),
+          items: itemsArray,
           // Add compatibility fields for AdminDashboard
           id: order.id,
           customer: order.customer_name,
@@ -199,9 +246,13 @@ export const getAllOrders = async () => {
               : order.payment_method,
           shippingAddress: `${order.shipping_address}, ${order.shipping_city}, ${order.shipping_zip_code}`,
         };
+        
+        console.log(`✅ Order ${order.id} enriched with ${itemsArray.length} items`, { items: itemsArray, order: enrichedOrder });
+        return enrichedOrder;
       }),
     );
 
+    console.log(`✅ All orders enriched. Total: ${enrichedOrders.length} orders`);
     return enrichedOrders;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -394,6 +445,44 @@ export const getOrdersByCustomerEmail = async (email) => {
     return (data || []).map(transformOrder);
   } catch (error) {
     console.error("Error fetching customer orders:", error);
+    throw error;
+  }
+};
+
+/**
+ * Delete an order and all its associated items
+ * @param {number} orderId - The order ID to delete
+ * @returns {Promise<void>}
+ */
+export const deleteOrder = async (orderId) => {
+  try {
+    console.log(`🗑️ Deleting order ${orderId}...`);
+
+    // First delete all order items
+    const { error: itemsError } = await supabase
+      .from("order_item")
+      .delete()
+      .eq("order_id", orderId);
+
+    if (itemsError) {
+      console.error("Error deleting order items:", itemsError);
+      throw new Error(`Failed to delete order items: ${itemsError.message}`);
+    }
+
+    // Then delete the order itself
+    const { error: orderError } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", orderId);
+
+    if (orderError) {
+      console.error("Error deleting order:", orderError);
+      throw new Error(`Failed to delete order: ${orderError.message}`);
+    }
+
+    console.log(`✅ Order ${orderId} and all its items deleted successfully`);
+  } catch (error) {
+    console.error("Error in deleteOrder:", error);
     throw error;
   }
 };

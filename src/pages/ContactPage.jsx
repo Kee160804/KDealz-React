@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import '../styles/ContactPage.css';
+import { saveMessage } from '../services/messageService';
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -44,6 +45,7 @@ const ContactPage = () => {
   const [activeFAQ, setActiveFAQ] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Add visual effects on mount
   useEffect(() => {
@@ -59,26 +61,56 @@ const ContactPage = () => {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Contact form submitted:', formData);
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-    
-    // Reset form after success
-    setTimeout(() => {
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
-      setSubmitSuccess(false);
-    }, 3000);
+    try {
+      // Validate form
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.subject || !formData.message) {
+        throw new Error("Please fill in all required fields.");
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        throw new Error("Please enter a valid email address.");
+      }
+
+      // Validate phone format
+      if (formData.phone.length < 7) {
+        throw new Error("Please enter a valid phone number.");
+      }
+
+      // Save message to database
+      const messageData = {
+        customerName: `${formData.firstName} ${formData.lastName}`,
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
+        subject: formData.subject,
+        notes: formData.message
+      };
+
+      await saveMessage(messageData);
+      
+      setIsSubmitting(false);
+      setSubmitSuccess(true);
+      
+      // Reset form after success
+      setTimeout(() => {
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+        setSubmitSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting message:", error);
+      setSubmitError(error.message || "Failed to send message. Please try again.");
+      setIsSubmitting(false);
+    }
   }, [formData]);
 
   const toggleFAQ = useCallback((id) => {
@@ -135,6 +167,7 @@ const ContactPage = () => {
             formData={formData}
             isSubmitting={isSubmitting}
             submitSuccess={submitSuccess}
+            submitError={submitError}
             onChange={handleChange}
             onSubmit={handleSubmit}
           />
@@ -333,11 +366,17 @@ const SocialIcon = ({ social, index }) => (
 // CONTACT FORM SECTION
 // ============================================================================
 
-const ContactFormSection = ({ formData, isSubmitting, submitSuccess, onChange, onSubmit }) => (
+const ContactFormSection = ({ formData, isSubmitting, submitSuccess, submitError, onChange, onSubmit }) => (
   <div className="contact-form-section">
     <div className="contact-form-wrapper">
       <section className="form-section card" id="contact-form">
         <FormHeader />
+        
+        {submitError && (
+          <div className="form-error-banner" style={{ marginBottom: '20px', padding: '12px 16px', backgroundColor: '#fee', borderLeft: '4px solid #c33', color: '#933', borderRadius: '4px', fontSize: '14px' }}>
+            ⚠️ {submitError}
+          </div>
+        )}
         
         <form onSubmit={onSubmit} className="contact-form">
           <div className="form-row">

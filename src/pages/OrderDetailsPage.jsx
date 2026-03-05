@@ -262,47 +262,6 @@ const OrderDetailsPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Status Management */}
-          <div className="info-card admin-section">
-            <h2>⚙️ Order Management</h2>
-            <div className="status-controls">
-              <div className="control-group">
-                <label>Update Order Status</label>
-                <div className="button-group">
-                  {[
-                    "pending_confirmation",
-                    "confirmed",
-                    "processing",
-                    "shipped",
-                    "completed",
-                    "cancelled",
-                  ].map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => handleStatusChange(status)}
-                      disabled={updating || order.order_status === status}
-                      className={`status-btn ${order.order_status === status ? "active" : ""}`}
-                      title={`Change status to ${status}`}
-                    >
-                      {formatStatusLabel(status)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="metadata">
-              <p className="text-muted">
-                Last updated: {new Date(order.updated_at).toLocaleString()}
-              </p>
-              {order.whatsapp_conversation_id && (
-                <p className="text-muted">
-                  WhatsApp Conversation ID: {order.whatsapp_conversation_id}
-                </p>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Action Buttons */}
