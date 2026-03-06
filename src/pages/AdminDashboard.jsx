@@ -179,43 +179,6 @@ const AdminDashboard = () => {
     };
   };
 
-  // const transformProduct = (rawProduct) => {
-  //   let availableSizes = [];
-  //   if (rawProduct.sizes) {
-  //     if (typeof rawProduct.available_Sizes === 'string') {
-  //       try {
-  //         sizes = JSON.parse(rawProduct.sizes);
-  //       } catch {
-  //         sizes = rawProduct.sizes.split(',').map(s => s.trim());
-  //       }
-  //     } else if (Array.isArray(rawProduct.sizes)) {
-  //       sizes = rawProduct.sizes;
-  //     }
-  //   }
-
-  //   let availableSizes = {};
-  //   // Check for both possible column names (case‑insensitive)
-  //   const availableSizesRaw = rawProduct.available_sizes !== undefined ? rawProduct.available_sizes : rawProduct.available_Sizes;
-  //   if (availableSizesRaw) {
-  //     if (typeof availableSizesRaw === 'string') {
-  //       try {
-  //         availableSizes = JSON.parse(availableSizesRaw);
-  //       } catch (e) {
-  //         console.warn('Failed to parse available_sizes for product', rawProduct.id, e);
-  //       }
-  //     } else if (typeof availableSizesRaw === 'object') {
-  //       availableSizes = availableSizesRaw;
-  //     }
-  //   }
-
-  //   return {
-  //     ...rawProduct,
-  //     stock_quantity: rawProduct.stock_quantity,
-  //     sizes,
-  //     availableSizes,
-  //   };
-  // };
-
   // Helper to parse stored sizes into entries for the edit form
 
   const parseSizesToEntries = (product) => {
@@ -271,57 +234,6 @@ const AdminDashboard = () => {
     return entries;
   };
 
-  // const parseSizesToEntries = (product) => {
-  //   const entries = [];
-  //   let sizesArray = [];
-  //   let availableObj = {};
-
-  //   if (product.sizes) {
-  //     if (Array.isArray(product.sizes)) {
-  //       sizesArray = product.sizes;
-  //     } else if (typeof product.sizes === 'string') {
-  //       try {
-  //         sizesArray = JSON.parse(product.sizes);
-  //       } catch {
-  //         sizesArray = product.sizes.split(',').map(s => s.trim());
-  //       }
-  //     }
-  //   }
-
-  //   if (product.availableSizes) {
-  //     availableObj = product.availableSizes;
-  //   } else if (product.available_sizes) {
-  //     if (typeof product.available_sizes === 'object') {
-  //       availableObj = product.available_sizes;
-  //     } else if (typeof product.available_sizes === 'string') {
-  //       try {
-  //         availableObj = JSON.parse(product.available_sizes);
-  //       } catch {
-  //         availableObj = {};
-  //       }
-  //     }
-  //   } else if (product.available_Sizes) { // fallback for capital S
-  //     if (typeof product.available_Sizes === 'object') {
-  //       availableObj = product.available_Sizes;
-  //     } else if (typeof product.available_Sizes === 'string') {
-  //       try {
-  //         availableObj = JSON.parse(product.available_Sizes);
-  //       } catch {
-  //         availableObj = {};
-  //       }
-  //     }
-  //   }
-
-  //   if (sizesArray.length > 0) {
-  //     sizesArray.forEach(size => {
-  //       entries.push({
-  //         size: size,
-  //         stock_quantity: availableObj[size] || 0
-  //       });
-  //     });
-  //   }
-  //   return entries;
-  // };
 
   const [newProduct, setNewProduct] = useState({
     name: "",

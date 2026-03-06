@@ -14,6 +14,22 @@ const ProductsPage = ({ addToCart }) => {
   const [sortBy, setSortBy] = useState("name");
   const [searchTerm, setSearchTerm] = useState("");
 
+  //  URL SEARCH PARAMS: Read category from URL on page load
+  // This useEffect runs when the component mounts or when the URL changes
+  useEffect(() => {
+    //  Get the current URL's search parameters
+    const params = new URLSearchParams(window.location.search);
+    
+    //  Read the 'category' parameter from URL (e.g., ?category=mens-clothing)
+    const categoryFromUrl = params.get('category');
+    
+    //  If category parameter exists in URL, set it as the selected category
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+      console.log('📍 Category loaded from URL:', categoryFromUrl); // Debug log to trace the parameter
+    }
+  }, []); // Empty dependency array means this runs only once on mount
+
   const SORT_OPTIONS = [
     { value: "name", label: "Name (A-Z)" },
     { value: "price-low", label: "Price: Low to High" },
