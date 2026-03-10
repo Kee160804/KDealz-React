@@ -438,7 +438,7 @@ const AdminDashboard = () => {
     if (showRevenueModal) return "revenue";
     if (showProfitModal) return "profit";
     if (showInventoryModal) return "inventory";
-    if (showPendingModal) return "pending";
+    if (showPendingModal) return "pending_confirmation";
     if (showSalesModal) return "sales";
     if (showFinancialModal) return "financial";
     return null;
@@ -518,7 +518,7 @@ const AdminDashboard = () => {
       .filter((o) => new Date(o.date).toDateString() === today)
       .reduce((sum, o) => sum + o.total, 0);
 
-    const pendingOrders = orders.filter((o) => o.status === "pending").length;
+    const pendingOrders = orders.filter((o) => o.status === "pending_confirmation").length;
     const lowStockItems = products.filter((p) => p.stock_quantity < 10).length;
 
     setStats({
@@ -671,7 +671,7 @@ const AdminDashboard = () => {
       case "inventory":
         setShowInventoryModal(true);
         break;
-      case "pending":
+      case "pending_confirmation":
         setShowPendingModal(true);
         break;
       case "sales":
@@ -1154,7 +1154,7 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={() => {
-              openModal("pending");
+              openModal("_pending_confirmation");
               setIsMobileMenuOpen(false);
             }}
           >
@@ -1273,11 +1273,11 @@ const AdminDashboard = () => {
             </span>
           </div>
         </div>
-        <div className="stat-card pending" onClick={() => openModal("pending")}>
+        <div className="stat-card pending_confirmation" onClick={() => openModal("pending_confirmation")}>
           <div className="stat-icon">⏳</div>
           <div className="stat-content">
             <h3>Pending Orders</h3>
-            <p className="stat-value pending">{stats.pendingOrders}</p>
+            <p className="stat-value pending_confirmation">{stats.pendingOrders}</p>
             <span className="stat-link">
               View <span className="arrow">→</span>
             </span>
@@ -1434,7 +1434,7 @@ const AdminDashboard = () => {
             <span className="action-icon">📦</span>
             <span className="action-text">Update Stock</span>
           </button>
-          <button className="action-btn" onClick={() => openModal("pending")}>
+          <button className="action-btn" onClick={() => openModal("pending_confirmation")}>
             <span className="action-icon">✅</span>
             <span className="action-text">Process Orders</span>
           </button>
@@ -1633,7 +1633,7 @@ const AdminDashboard = () => {
                     className="category-select"
                   >
                     <option value="all">All Statuses</option>
-                    <option value="pending">⏳ Pending</option>
+                    <option value="pending_confirmation">⏳ Pending Confirmation</option>
                     <option value="processing">⚙️ Processing</option>
                     <option value="shipped">🚚 Shipped</option>
                     <option value="completed">✅ Completed</option>
@@ -2215,7 +2215,7 @@ const AdminDashboard = () => {
                       <tr key={exp.id}>
                         <td>{new Date(exp.date).toLocaleDateString()}</td>
                         <td>
-                          <span className="status-badge pending">
+                          <span className="status-badge pending_confirmation">
                             {exp.type === "restock" ? "Restock" : "Purchase"}
                           </span>
                         </td>
@@ -2339,7 +2339,7 @@ const AdminDashboard = () => {
         <div className="modal-overlay">
           <div
             className="modal-content large"
-            ref={modalRefs.pending}
+            ref={modalRefs.pending_confirmation}
             tabIndex="-1"
             role="dialog"
             aria-modal="true"
@@ -2352,7 +2352,7 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className="modal-body">
-              {orders.filter((o) => o.status === "pending").length === 0 ? (
+              {orders.filter((o) => o.status === "pending_confirmation").length === 0 ? (
                 <p className="no-data">No pending orders! 🎉</p>
               ) : (
                 <table className="modal-table">
@@ -2369,7 +2369,7 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {orders
-                      .filter((o) => o.status === "pending")
+                      .filter((o) => o.status === "pending_confirmation")
                       .map((order) => (
                         <tr key={order.id}>
                           <td className="order-id">{order.id}</td>
@@ -2388,7 +2388,7 @@ const AdminDashboard = () => {
                               }}
                               className="status-select"
                             >
-                              <option value="pending">Pending</option>
+                              <option value="pending_confirmation">Pending Confirmation</option>
                               <option value="processing">Processing</option>
                               <option value="shipped">Shipped</option>
                               <option value="completed">Completed</option>
@@ -2398,7 +2398,7 @@ const AdminDashboard = () => {
                             <button
                               className="action-small view"
                               onClick={() =>
-                                openDetailModal("orderDetail", order, "pending")
+                                openDetailModal("orderDetail", order, "pending_confirmation")
                               }
                             >
                               View
@@ -2814,7 +2814,7 @@ const AdminDashboard = () => {
                   }}
                   className="status-select"
                 >
-                  <option value="pending">⏳ Pending</option>
+                  <option value="pending_confirmation">⏳ Pending Confirmation</option>
                   <option value="processing">⚙️ Processing</option>
                   <option value="shipped">🚚 Shipped</option>
                   <option value="completed">✅ Completed</option>

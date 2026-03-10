@@ -346,7 +346,7 @@ export const updateOrderStatus = async (orderId, newStatus) => {
  */
 export const updatePaymentStatus = async (orderId, paymentStatus) => {
   try {
-    const validStatuses = ["pending", "completed", "failed", "refunded"];
+    const validStatuses = ["pending_confirmation", "completed", "failed", "refunded"];
 
     if (!validStatuses.includes(paymentStatus)) {
       throw new Error(
