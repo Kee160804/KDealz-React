@@ -212,7 +212,27 @@ const OrderDetailsPage = () => {
                   order.items.map((item, index) => (
                     <div key={index} className="table-row">
                       <div className="col-product">
+                        {/* OLD CODE - Previously showed only Product ID
                         <span>Product ID: {item.product_id}</span>
+                        */}
+                        {/* NEW CODE - Now displays product name from the enriched items data
+                        This shows the actual product name that was fetched from the database
+                        which provides better UX for customers viewing their orders */}
+                        <span>
+                          {item.name || `Product ID: ${item.product_id}`}
+                        </span>
+                        {/* If a size was selected, display it under the product name */}
+                        {item.size && (
+                          <div
+                            style={{
+                              fontSize: "0.85em",
+                              color: "#666",
+                              marginTop: "4px",
+                            }}
+                          >
+                            Size: {item.size}
+                          </div>
+                        )}
                       </div>
                       <div className="col-quantity">{item.quantity}</div>
                       <div className="col-price">

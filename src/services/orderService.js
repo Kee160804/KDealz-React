@@ -146,6 +146,84 @@ export const createOrder = async (orderData, cartItems) => {
       console.warn("Warning: Order created but items could not be inserted.");
     }
 
+    /* NEW CODE - Reduce stock for each ordered product
+    When an order is successfully placed, we need to update the inventory
+    by reducing the stock quantity for each product that was ordered.
+    
+    This is critical for accurate inventory management - it ensures the database
+    reflects the actual available stock after orders are placed.
+    
+    We loop through each order item and reduce the product's stock by the quantity ordered.
+    We use the available_Sizes object if the product has sizes, otherwise just reduce
+    the main stock_quantity.
+    */
+    try {
+      for (const item of cartItems) {
+        const productId = item.id;
+        const quantityOrdered = item.quantity;
+        const selectedSize = item.selectedSize;
+
+        // Fetch current product to get its stock info
+        const { data: currentProduct, error: fetchError } = await supabase
+          .from("products")
+          .select("stock_quantity, available_Sizes, sizes")
+          .eq("id", productId)
+          .single();
+
+        if (fetchError) {
+          console.warn(`⚠️ Could not fetch product ${productId} for stock update:`, fetchError);
+          continue;
+        }
+
+        let updatedStock = {};
+
+        if (selectedSize && currentProduct.available_Sizes) {
+          // Product has sizes - update the specific size's stock
+          try {
+            const availableSizes = typeof currentProduct.available_Sizes === 'string' 
+              ? JSON.parse(currentProduct.available_Sizes) 
+              : currentProduct.available_Sizes;
+            
+            const currentSizeStock = availableSizes[selectedSize] || 0;
+            const newSizeStock = Math.max(0, currentSizeStock - quantityOrdered);
+            
+            updatedStock = {
+              ...availableSizes,
+              [selectedSize]: newSizeStock,
+            };
+          } catch (parseError) {
+            console.warn(`⚠️ Error parsing available_Sizes for product ${productId}:`, parseError);
+            updatedStock = currentProduct.available_Sizes;
+          }
+        }
+
+        // Update the product stock in the database
+        const updatePayload = selectedSize && Object.keys(updatedStock).length > 0
+          ? {
+              available_Sizes: JSON.stringify(updatedStock),
+              stock_quantity: Math.max(0, (currentProduct.stock_quantity || 0) - quantityOrdered),
+            }
+          : {
+              stock_quantity: Math.max(0, (currentProduct.stock_quantity || 0) - quantityOrdered),
+            };
+
+        const { error: updateError } = await supabase
+          .from("products")
+          .update(updatePayload)
+          .eq("id", productId);
+
+        if (updateError) {
+          console.warn(`⚠️ Failed to update stock for product ${productId}:`, updateError);
+        } else {
+          console.log(`✅ Stock reduced for product ${productId}: ${quantityOrdered} units removed`);
+        }
+      }
+    } catch (stockError) {
+      console.error("Error reducing stock after order creation:", stockError);
+      // Don't throw here - order was successfully created, just log the warning
+      console.warn("Order created successfully but stock reduction encountered an error");
+    }
+
     // Return complete order with items
     return {
       ...transformOrder(orderRecord),

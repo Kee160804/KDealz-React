@@ -143,7 +143,22 @@ const ProductCard = ({ product, addToCart }) => {
             sizes={product.sizes}
             availableSizes={product.availableSizes}
             selectedSize={selectedSize}
-            onSizeSelect={setSelectedSize}
+            /* NEW CODE - Reset quantity when size changes
+            When a customer selects a different size, we need to reset the quantity
+            counter back to 1. This prevents accidental adding of wrong quantities
+            for the new size.
+            
+            For example:
+            1. Customer selects Size M, sets quantity to 5
+            2. Customer switches to Size L
+            3. Quantity should reset to 1 (not stay at 5)
+            
+            The onSizeSelect callback now includes a quantity reset.
+            */
+            onSizeSelect={(size) => {
+              setSelectedSize(size);
+              setQuantity(1); // Reset quantity when size changes
+            }}
           />
         )}
 

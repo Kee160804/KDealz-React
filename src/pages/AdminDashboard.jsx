@@ -29,13 +29,26 @@ import {
   deleteProduct,
   updateStock,
 } from "../services/productService";
-import { getAllOrders, updateOrderStatus, deleteOrder } from "../services/orderService";
+import {
+  getAllOrders,
+  updateOrderStatus,
+  deleteOrder,
+} from "../services/orderService";
 import { getAllUsers } from "../services/userService";
 import { getAllExpenses, addExpense } from "../services/expenseService";
 import {
   getAllCategories,
   getAllSubcategories,
   getSubcategoriesByCategoryId,
+  /* NEW CODE - Import the addCategory function to enable category creation
+  This allows admins to dynamically add new product categories without 
+  needing to manually add them to the database.
+  */
+  addCategory,
+  /* NEW CODE - Import the deleteCategory function to enable category deletion
+  This allows admins to remove categories that are no longer needed.
+  */
+  deleteCategory,
 } from "../services/categoryService";
 
 const AdminDashboard = () => {
@@ -63,6 +76,13 @@ const AdminDashboard = () => {
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [showEditProductModal, setShowEditProductModal] = useState(false);
   const [showFinancialModal, setShowFinancialModal] = useState(false);
+
+  /* NEW CODE - Add state for the category management modal and new category name input
+  This allows admins to add new categories through a user interface.
+  */
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
 
   // Product filtering states
   const [productSearchTerm, setProductSearchTerm] = useState("");
@@ -234,7 +254,6 @@ const AdminDashboard = () => {
     return entries;
   };
 
-
   const [newProduct, setNewProduct] = useState({
     name: "",
     category_id: "",
@@ -308,7 +327,11 @@ const AdminDashboard = () => {
     showAddProductModal ||
     showRestockModal ||
     showEditProductModal ||
-    showFinancialModal;
+    showFinancialModal ||
+    /* NEW CODE - Include the add category modal in the anyModalOpen check
+    This ensures proper scroll locking and focus management when the modal is open
+    */
+    showAddCategoryModal;
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -389,18 +412,26 @@ const AdminDashboard = () => {
 
   // Load categories and subcategories
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const categories = await getAllCategories();
-        const subcategories = await getAllSubcategories();
-        setCategoryList(categories || []);
-        setSubcategoryList(subcategories || []);
-      } catch (error) {
-        console.error("Error loading categories:", error);
-      }
-    };
     loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const categories = await getAllCategories();
+      const subcategories = await getAllSubcategories();
+      setCategoryList(categories || []);
+      setSubcategoryList(subcategories || []);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  };
+
+  // Reprocess chart data when categoryList changes
+  useEffect(() => {
+    if (products.length > 0 && categoryList.length > 0) {
+      processChartData(orders, products);
+    }
+  }, [categoryList, products, orders ]);
 
   // Load order items when order detail modal opens
   useEffect(() => {
@@ -410,16 +441,18 @@ const AdminDashboard = () => {
           console.log(`📦 Loading items for order ${selectedItem.id}...`);
           const allOrders = await getAllOrders();
           const updatedOrder = allOrders.find((o) => o.id === selectedItem.id);
-          
+
           if (updatedOrder) {
-            console.log(`✅ Found order with ${updatedOrder.items?.length || 0} items`);
+            console.log(
+              `✅ Found order with ${updatedOrder.items?.length || 0} items`,
+            );
             setSelectedItem(updatedOrder);
           }
         } catch (error) {
           console.error("Error loading order items:", error);
         }
       };
-      
+
       loadOrderItems();
     }
   }, [showOrderDetailModal, selectedItem?.id]);
@@ -518,7 +551,9 @@ const AdminDashboard = () => {
       .filter((o) => new Date(o.date).toDateString() === today)
       .reduce((sum, o) => sum + o.total, 0);
 
-    const pendingOrders = orders.filter((o) => o.status === "pending_confirmation").length;
+    const pendingOrders = orders.filter(
+      (o) => o.status === "pending_confirmation",
+    ).length;
     const lowStockItems = products.filter((p) => p.stock_quantity < 10).length;
 
     setStats({
@@ -536,6 +571,17 @@ const AdminDashboard = () => {
     });
 
     setRecentOrders(orders.slice(-5).reverse());
+
+    /* OLD CODE - This was showing orders in reverse, but since getAllOrders already returns 
+    data sorted by created_at descending (latest first), the slice(-5).reverse() was undoing that
+    and showing the oldest 5 orders first, which defeats the purpose of "Recent Orders"
+    
+    NEW CODE - Now we simply take the first 5 orders from the already-sorted list, which gives us
+    the 5 most recent orders in descending order (newest first).
+    This is the correct behavior for a "Recent Orders" section.
+    */
+    // CORRECTED: Simply slice the first 5 from the already-sorted orders (newest first)
+    setRecentOrders(orders.slice(0, 5));
   };
 
   const processChartData = (orders, products) => {
@@ -569,18 +615,54 @@ const AdminDashboard = () => {
     });
     setSalesData(salesByDay);
 
+    /* OLD CODE - Previously used category_id (number) as the key
     const categories = {};
     products.forEach((product) => {
       const cat = product.category_id || "Uncategorized";
       if (!categories[cat])
         categories[cat] = { name: cat, value: 0, revenue: 0, stock: 0 };
-      categories[cat].value += 1;
-      categories[cat].stock_quantity += product.stock_quantity;
+    });
+    
+    NEW CODE - Now uses actual category NAME from the category object
+    This allows the pie chart to display readable category names like "Apparel" 
+    instead of category IDs like "1" or "2"
+    
+    We get the category name from either:
+    1. product.category.name (if category data is joined in the query)
+    2. OR we look up the category name from categoryList state
+    */
+    const categories = {};
+    products.forEach((product) => {
+      // Get category name from the product's category object
+      let categoryName = "Uncategorized";
+
+      if (product.category && product.category.name) {
+        // If category name is already in product object, use it
+        categoryName = product.category.name;
+      } else if (product.category_id) {
+        // Otherwise, look up category name from categoryList
+        const foundCategory = categoryList.find(
+          (cat) => cat.id === product.category_id,
+        );
+        if (foundCategory) {
+          categoryName = foundCategory.name;
+        }
+      }
+
+      if (!categories[categoryName])
+        categories[categoryName] = {
+          name: categoryName,
+          value: 0,
+          revenue: 0,
+          stock: 0,
+        };
+      categories[categoryName].value += 1;
+      categories[categoryName].stock_quantity += product.stock_quantity;
       const rev = orders.reduce((sum, order) => {
         const item = order.items.find((i) => i.productId === product.id);
         return sum + (item ? item.price * item.quantity : 0);
       }, 0);
-      categories[cat].revenue += rev;
+      categories[categoryName].revenue += rev;
     });
     setCategoryData(Object.values(categories));
   };
@@ -979,7 +1061,11 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteOrder = async (orderId) => {
-    if (!window.confirm("⚠️ Are you sure you want to DELETE this order? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "⚠️ Are you sure you want to DELETE this order? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -992,6 +1078,81 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error deleting order:", error);
       alert(`❌ Failed to delete order: ${error.message}`);
+    }
+  };
+
+  /* NEW CODE - Handler for adding a new category
+  This function takes the category name from the input field, validates it,
+  and sends it to the database via the addCategory service function.
+  After successful creation, it:
+  1. Clears the input field
+  2. Reloads the dashboard data to reflect the new category
+  3. Closes the modal
+  4. Displays a success message
+  */
+  const handleAddCategory = async () => {
+    try {
+      // Validate that category name is not empty
+      if (!newCategoryName.trim()) {
+        alert("Please enter a category name");
+        return;
+      }
+
+      setAddingCategory(true);
+
+      // Call the addCategory service function from categoryService.js
+      const createdCategory = await addCategory(newCategoryName.trim());
+
+      alert(`✅ Category "${createdCategory.name}" added successfully!`);
+
+      // Reload category data
+      loadCategories();
+
+      // Clear the input field
+      setNewCategoryName("");
+
+      // Close the modal
+      setShowAddCategoryModal(false);
+
+      // Reload the dashboard data to include the new category
+      await loadDashboardData();
+    } catch (error) {
+      console.error("Error adding category:", error);
+      alert(`❌ Failed to add category: ${error.message}`);
+    } finally {
+      setAddingCategory(false);
+    }
+  };
+
+  /* NEW CODE - Handler for deleting a category
+  This function allows admins to delete categories that are no longer needed.
+  When a category is deleted:
+  1. User confirms the action with a warning dialog
+  2. Category is removed from database
+  3. Dashboard data is refreshed to reflect changes
+  4. Category dropdowns are updated automatically
+  */
+  const handleDeleteCategory = async (categoryId, categoryName) => {
+    try {
+      // Confirm before deleting
+      if (
+        !window.confirm(
+          `⚠️ Are you sure you want to DELETE the category "${categoryName}"? This action cannot be undone.`,
+        )
+      ) {
+        return; // User cancelled
+      }
+
+      // Call the deleteCategory service function
+      await deleteCategory(categoryId);
+
+      alert(`✅ Category "${categoryName}" deleted successfully!`);
+
+      // Reload the dashboard data to reflect the deletion
+      await loadDashboardData();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      alert(`❌ Failed to delete category: ${error.message}`);
     }
   };
 
@@ -1024,7 +1185,7 @@ const AdminDashboard = () => {
       const startDate = new Date(customStartDate);
       const endDate = new Date(customEndDate);
       endDate.setHours(23, 59, 59, 999);
-      
+
       return salesData.filter((item) => {
         const itemDate = new Date(item.date);
         return itemDate >= startDate && itemDate <= endDate;
@@ -1273,11 +1434,16 @@ const AdminDashboard = () => {
             </span>
           </div>
         </div>
-        <div className="stat-card pending_confirmation" onClick={() => openModal("pending_confirmation")}>
+        <div
+          className="stat-card pending_confirmation"
+          onClick={() => openModal("pending_confirmation")}
+        >
           <div className="stat-icon">⏳</div>
           <div className="stat-content">
             <h3>Pending Orders</h3>
-            <p className="stat-value pending_confirmation">{stats.pendingOrders}</p>
+            <p className="stat-value pending_confirmation">
+              {stats.pendingOrders}
+            </p>
             <span className="stat-link">
               View <span className="arrow">→</span>
             </span>
@@ -1347,9 +1513,26 @@ const AdminDashboard = () => {
                 outerRadius={80}
                 dataKey="value"
                 label={({ name, value }) => {
-                  const total = categoryData.reduce((sum, item) => sum + item.value, 0);
+                  /* OLD CODE - Previously displayed: "Apparel - 10 products (15%)"
+                  const total = categoryData.reduce(
+                    (sum, item) => sum + item.value,
+                    0,
+                  );
                   const percent = ((value / total) * 100).toFixed(1);
-                  return `${name} (${percent}%)`;
+                  return `${name} - ${value} product${value > 1 ? "s" : ""} (${percent}%)`;
+                  
+                  NEW CODE - FIXED: Now displays EXACTLY what user wants: "Apparel 25%"
+                  This is cleaner, simpler, and more professional looking on the pie chart.
+                  Formula: Calculate percentage = (value / total) * 100, then round to 1 decimal
+                  Example output: "Apparel 25%" or "Electronics 15.5%"
+                  */
+                  const total = categoryData.reduce(
+                    (sum, item) => sum + item.value,
+                    0,
+                  );
+                  const percent = ((value / total) * 100).toFixed(0); // Round to whole number
+                  // Format: "Category Name Percentage%"
+                  return `${name} ${percent}%`;
                 }}
               >
                 {categoryData.map((_, i) => (
@@ -1358,14 +1541,38 @@ const AdminDashboard = () => {
               </Pie>
               <Tooltip
                 formatter={(value, name, props) => {
-                  const total = categoryData.reduce((sum, item) => sum + item.value, 0);
+                  const total = categoryData.reduce(
+                    (sum, item) => sum + item.value,
+                    0,
+                  );
                   const percent = ((value / total) * 100).toFixed(1);
-                  return [`${value} products (${percent}%)`, props.payload.name];
+                  return [
+                    `${value} products (${percent}%)`,
+                    props.payload.name,
+                  ];
                 }}
               />
             </PieChart>
           </ResponsiveContainer>
-          <div className="chart-footer">Click to manage categories →</div>
+          {/* NEW CODE - Add button for category management in the pie chart footer
+          This provides easy access to add new categories from the dashboard overview.
+          The button triggers the add category modal.
+          */}
+          <div className="chart-footer">
+            <span>Click to manage categories →</span>
+            <button
+              className="action-btn"
+              onClick={() => setShowAddCategoryModal(true)}
+              style={{
+                marginLeft: "10px",
+                padding: "5px 10px",
+                fontSize: "0.9em",
+              }}
+              title="Add a new product category"
+            >
+              ➕ Add Category
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1434,7 +1641,10 @@ const AdminDashboard = () => {
             <span className="action-icon">📦</span>
             <span className="action-text">Update Stock</span>
           </button>
-          <button className="action-btn" onClick={() => openModal("pending_confirmation")}>
+          <button
+            className="action-btn"
+            onClick={() => openModal("pending_confirmation")}
+          >
             <span className="action-icon">✅</span>
             <span className="action-text">Process Orders</span>
           </button>
@@ -1515,6 +1725,62 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className="modal-body">
+              {/* NEW CODE - Add search and filter functionality to products modal
+              Similar to the orders modal, this allows admins to:
+              1. Search products by name (real-time search)
+              2. Filter products by category to narrow down the view
+              3. Clear filters to reset the view
+              
+              This makes it much easier to find specific products in a large inventory.
+              */}
+              <div className="order-filters" style={{ marginBottom: "20px" }}>
+                <div className="filters-container">
+                  <div className="search-box">
+                    <span className="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      placeholder="Search products by name or SKU..."
+                      value={productSearchTerm}
+                      onChange={(e) => setProductSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                    {productSearchTerm && (
+                      <button
+                        className="clear-search"
+                        onClick={() => setProductSearchTerm("")}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  <div className="filter-dropdown">
+                    <select
+                      value={productCategoryFilter}
+                      onChange={(e) => setProductCategoryFilter(e.target.value)}
+                      className="category-select"
+                    >
+                      <option value="all">All Categories</option>
+                      {categoryList.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {(productSearchTerm || productCategoryFilter !== "all") && (
+                    <button
+                      className="clear-filters-btn"
+                      onClick={() => {
+                        setProductSearchTerm("");
+                        setProductCategoryFilter("all");
+                      }}
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <table className="modal-table">
                 <thead>
                   <tr>
@@ -1528,46 +1794,70 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id}>
-                      <td>{product.name}</td>
-                      <td>{product.category_id}</td>
-                      <td>{formatCurrency(product.price)}</td>
-                      <td>
-                        {formatCurrency(product.cost || product.price * 0.6)}
-                      </td>
-                      <td
-                        className={
-                          product.stock_quantity < 10 ? "stock-low" : ""
-                        }
-                      >
-                        {product.stock_quantity}
-                      </td>
-                      <td>{product.SKU || `SKU-${product.id}`}</td>
-                      <td className="action-cell">
-                        <button
-                          className="action-small view"
-                          onClick={() =>
-                            openDetailModal("productDetail", product, "product")
+                  {products
+                    /* Filter products based on search term and category filter
+                    Search works on product name and SKU (case-insensitive)
+                    Category filter checks if product's category_id matches the selected filter
+                    */
+                    .filter((product) => {
+                      const matchesSearch =
+                        product.name
+                          .toLowerCase()
+                          .includes(productSearchTerm.toLowerCase()) ||
+                        (product.SKU || `SKU-${product.id}`)
+                          .toLowerCase()
+                          .includes(productSearchTerm.toLowerCase());
+
+                      const matchesCategory =
+                        productCategoryFilter === "all" ||
+                        product.category_id === parseInt(productCategoryFilter);
+
+                      return matchesSearch && matchesCategory;
+                    })
+                    .map((product) => (
+                      <tr key={product.id}>
+                        <td>{product.name}</td>
+                        <td>{product.category_id}</td>
+                        <td>{formatCurrency(product.price)}</td>
+                        <td>
+                          {formatCurrency(product.cost || product.price * 0.6)}
+                        </td>
+                        <td
+                          className={
+                            product.stock_quantity < 10 ? "stock-low" : ""
                           }
                         >
-                          View
-                        </button>
-                        <button
-                          className="action-small edit"
-                          onClick={() => openEditModal(product, "product")}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="action-small delete"
-                          onClick={() => handleDeleteProduct(product.id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          {product.stock_quantity}
+                        </td>
+                        <td>{product.SKU || `SKU-${product.id}`}</td>
+                        <td className="action-cell">
+                          <button
+                            className="action-small view"
+                            onClick={() =>
+                              openDetailModal(
+                                "productDetail",
+                                product,
+                                "product",
+                              )
+                            }
+                          >
+                            View
+                          </button>
+                          <button
+                            className="action-small edit"
+                            onClick={() => openEditModal(product, "product")}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="action-small delete"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -1633,7 +1923,9 @@ const AdminDashboard = () => {
                     className="category-select"
                   >
                     <option value="all">All Statuses</option>
-                    <option value="pending_confirmation">⏳ Pending Confirmation</option>
+                    <option value="pending_confirmation">
+                      ⏳ Pending Confirmation
+                    </option>
                     <option value="processing">⚙️ Processing</option>
                     <option value="shipped">🚚 Shipped</option>
                     <option value="completed">✅ Completed</option>
@@ -1856,12 +2148,21 @@ const AdminDashboard = () => {
             </div>
             <div className="modal-body">
               {/* Time Filter Buttons */}
-              <div className="filter-buttons" style={{ marginBottom: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div
+                className="filter-buttons"
+                style={{
+                  marginBottom: "15px",
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
                 <button
                   onClick={() => setRevenueFilter("today")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: revenueFilter === "today" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      revenueFilter === "today" ? "#3498db" : "#ecf0f1",
                     color: revenueFilter === "today" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -1875,7 +2176,8 @@ const AdminDashboard = () => {
                   onClick={() => setRevenueFilter("7days")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: revenueFilter === "7days" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      revenueFilter === "7days" ? "#3498db" : "#ecf0f1",
                     color: revenueFilter === "7days" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -1889,7 +2191,8 @@ const AdminDashboard = () => {
                   onClick={() => setRevenueFilter("30days")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: revenueFilter === "30days" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      revenueFilter === "30days" ? "#3498db" : "#ecf0f1",
                     color: revenueFilter === "30days" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -1903,7 +2206,8 @@ const AdminDashboard = () => {
                   onClick={() => setRevenueFilter("all")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: revenueFilter === "all" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      revenueFilter === "all" ? "#3498db" : "#ecf0f1",
                     color: revenueFilter === "all" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -1945,22 +2249,24 @@ const AdminDashboard = () => {
               </div>
               <h4>Revenue by Day</h4>
               <div className="mini-chart">
-                {filterSalesDataByPeriod(salesData, revenueFilter).map((day, i) => (
-                  <div key={i} className="chart-bar-container">
-                    <div className="chart-bar-label">{day.date}</div>
-                    <div className="chart-bar-wrapper">
-                      <div
-                        className="chart-bar"
-                        style={{
-                          width: `${salesData.some((d) => d.sales > 0) ? (day.sales / Math.max(...salesData.map((d) => d.sales))) * 100 : 0}%`,
-                          backgroundColor: "#3498db",
-                        }}
-                      >
-                        {formatCurrency(day.sales)}
+                {filterSalesDataByPeriod(salesData, revenueFilter).map(
+                  (day, i) => (
+                    <div key={i} className="chart-bar-container">
+                      <div className="chart-bar-label">{day.date}</div>
+                      <div className="chart-bar-wrapper">
+                        <div
+                          className="chart-bar"
+                          style={{
+                            width: `${salesData.some((d) => d.sales > 0) ? (day.sales / Math.max(...salesData.map((d) => d.sales))) * 100 : 0}%`,
+                            backgroundColor: "#3498db",
+                          }}
+                        >
+                          {formatCurrency(day.sales)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
             <div className="modal-footer">
@@ -1991,12 +2297,21 @@ const AdminDashboard = () => {
             </div>
             <div className="modal-body">
               {/* Time Filter Buttons */}
-              <div className="filter-buttons" style={{ marginBottom: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div
+                className="filter-buttons"
+                style={{
+                  marginBottom: "15px",
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
                 <button
                   onClick={() => setProfitFilter("today")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: profitFilter === "today" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      profitFilter === "today" ? "#3498db" : "#ecf0f1",
                     color: profitFilter === "today" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -2010,7 +2325,8 @@ const AdminDashboard = () => {
                   onClick={() => setProfitFilter("7days")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: profitFilter === "7days" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      profitFilter === "7days" ? "#3498db" : "#ecf0f1",
                     color: profitFilter === "7days" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -2024,7 +2340,8 @@ const AdminDashboard = () => {
                   onClick={() => setProfitFilter("30days")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: profitFilter === "30days" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      profitFilter === "30days" ? "#3498db" : "#ecf0f1",
                     color: profitFilter === "30days" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -2038,7 +2355,8 @@ const AdminDashboard = () => {
                   onClick={() => setProfitFilter("all")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: profitFilter === "all" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      profitFilter === "all" ? "#3498db" : "#ecf0f1",
                     color: profitFilter === "all" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
@@ -2352,7 +2670,8 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className="modal-body">
-              {orders.filter((o) => o.status === "pending_confirmation").length === 0 ? (
+              {orders.filter((o) => o.status === "pending_confirmation")
+                .length === 0 ? (
                 <p className="no-data">No pending orders! 🎉</p>
               ) : (
                 <table className="modal-table">
@@ -2388,7 +2707,9 @@ const AdminDashboard = () => {
                               }}
                               className="status-select"
                             >
-                              <option value="pending_confirmation">Pending Confirmation</option>
+                              <option value="pending_confirmation">
+                                Pending Confirmation
+                              </option>
                               <option value="processing">Processing</option>
                               <option value="shipped">Shipped</option>
                               <option value="completed">Completed</option>
@@ -2398,7 +2719,11 @@ const AdminDashboard = () => {
                             <button
                               className="action-small view"
                               onClick={() =>
-                                openDetailModal("orderDetail", order, "pending_confirmation")
+                                openDetailModal(
+                                  "orderDetail",
+                                  order,
+                                  "pending_confirmation",
+                                )
                               }
                             >
                               View
@@ -2438,17 +2763,28 @@ const AdminDashboard = () => {
             </div>
             <div className="modal-body">
               {/* Date Range Filter */}
-              <div className="filter-buttons" style={{ marginBottom: "20px", display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+              <div
+                className="filter-buttons"
+                style={{
+                  marginBottom: "20px",
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
                 <button
                   onClick={() => setSalesChartFilter("7days")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: salesChartFilter === "7days" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      salesChartFilter === "7days" ? "#3498db" : "#ecf0f1",
                     color: salesChartFilter === "7days" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
                     cursor: "pointer",
-                    fontWeight: salesChartFilter === "7days" ? "bold" : "normal",
+                    fontWeight:
+                      salesChartFilter === "7days" ? "bold" : "normal",
                   }}
                 >
                   Last 7 Days
@@ -2457,12 +2793,14 @@ const AdminDashboard = () => {
                   onClick={() => setSalesChartFilter("30days")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: salesChartFilter === "30days" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      salesChartFilter === "30days" ? "#3498db" : "#ecf0f1",
                     color: salesChartFilter === "30days" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
                     cursor: "pointer",
-                    fontWeight: salesChartFilter === "30days" ? "bold" : "normal",
+                    fontWeight:
+                      salesChartFilter === "30days" ? "bold" : "normal",
                   }}
                 >
                   Last 30 Days
@@ -2471,12 +2809,14 @@ const AdminDashboard = () => {
                   onClick={() => setSalesChartFilter("custom")}
                   style={{
                     padding: "8px 12px",
-                    backgroundColor: salesChartFilter === "custom" ? "#3498db" : "#ecf0f1",
+                    backgroundColor:
+                      salesChartFilter === "custom" ? "#3498db" : "#ecf0f1",
                     color: salesChartFilter === "custom" ? "white" : "#333",
                     border: "none",
                     borderRadius: "4px",
                     cursor: "pointer",
-                    fontWeight: salesChartFilter === "custom" ? "bold" : "normal",
+                    fontWeight:
+                      salesChartFilter === "custom" ? "bold" : "normal",
                   }}
                 >
                   Custom Range
@@ -2487,14 +2827,22 @@ const AdminDashboard = () => {
                       type="date"
                       value={customStartDate}
                       onChange={(e) => setCustomStartDate(e.target.value)}
-                      style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
+                      style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                      }}
                     />
                     <span style={{ color: "#666" }}>to</span>
                     <input
                       type="date"
                       value={customEndDate}
                       onChange={(e) => setCustomEndDate(e.target.value)}
-                      style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
+                      style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                      }}
                     />
                   </>
                 )}
@@ -2510,7 +2858,9 @@ const AdminDashboard = () => {
                 <div className="detail-item">
                   <label>Selected Period Total</label>
                   <span className="value">
-                    {formatCurrency(getFilteredSalesData().reduce((s, d) => s + d.sales, 0))}
+                    {formatCurrency(
+                      getFilteredSalesData().reduce((s, d) => s + d.sales, 0),
+                    )}
                   </span>
                 </div>
                 <div className="detail-item">
@@ -2769,20 +3119,37 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedItem?.items && Array.isArray(selectedItem.items) && selectedItem.items.length > 0 ? (
+                  {selectedItem?.items &&
+                  Array.isArray(selectedItem.items) &&
+                  selectedItem.items.length > 0 ? (
                     selectedItem.items.map((item, i) => (
                       <tr key={i}>
-                        <td>{item.name || item.productId || "Unknown Product"}</td>
+                        <td>
+                          {item.name || item.productId || "Unknown Product"}
+                        </td>
                         <td>{item.size || "-"}</td>
                         <td>{formatCurrency(item.price)}</td>
                         <td>{item.quantity}</td>
-                        <td>{formatCurrency((item.price || 0) * (item.quantity || 0))}</td>
+                        <td>
+                          {formatCurrency(
+                            (item.price || 0) * (item.quantity || 0),
+                          )}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center", color: "#666", padding: "15px" }}>
-                        {loading ? "Loading items..." : "No items in this order"}
+                      <td
+                        colSpan="5"
+                        style={{
+                          textAlign: "center",
+                          color: "#666",
+                          padding: "15px",
+                        }}
+                      >
+                        {loading
+                          ? "Loading items..."
+                          : "No items in this order"}
                       </td>
                     </tr>
                   )}
@@ -2814,7 +3181,9 @@ const AdminDashboard = () => {
                   }}
                   className="status-select"
                 >
-                  <option value="pending_confirmation">⏳ Pending Confirmation</option>
+                  <option value="pending_confirmation">
+                    ⏳ Pending Confirmation
+                  </option>
                   <option value="processing">⚙️ Processing</option>
                   <option value="shipped">🚚 Shipped</option>
                   <option value="completed">✅ Completed</option>
@@ -2822,16 +3191,21 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => {
-                // Filter and show orders from last 30 days
-                const last30Orders = getLast30DaysOrders();
-                console.log(`Showing ${last30Orders.length} orders from last 30 days`);
-                // You can add additional UI to show these orders if needed
-              }}>
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  // Filter and show orders from last 30 days
+                  const last30Orders = getLast30DaysOrders();
+                  console.log(
+                    `Showing ${last30Orders.length} orders from last 30 days`,
+                  );
+                  // You can add additional UI to show these orders if needed
+                }}
+              >
                 📅 Last 30 Days Orders ({getLast30DaysOrders().length})
               </button>
               {selectedItem.status === "completed" && (
-                <button 
+                <button
                   className="btn-danger"
                   onClick={() => handleDeleteOrder(selectedItem.id)}
                   style={{ backgroundColor: "#e74c3c", color: "white" }}
@@ -2954,6 +3328,15 @@ const AdminDashboard = () => {
           >
             <div className="modal-header">
               <h2>➕ Add New Product</h2>
+              {/* NEW CODE - Display timestamp when product is being created
+              This shows the admin the exact date and time the product is being added to the system.
+              This helps track when products are created for auditing and inventory management purposes.
+              */}
+              <div
+                style={{ fontSize: "0.9em", color: "#666", marginLeft: "auto" }}
+              >
+                📅 {new Date().toLocaleString()}
+              </div>
               <button className="modal-close" onClick={closeAllModals}>
                 ×
               </button>
@@ -3114,6 +3497,61 @@ const AdminDashboard = () => {
                     Add sizes if this product comes in multiple sizes. Leave
                     empty for products without variants.
                   </p>
+                  {/* NEW CODE - Size and Stock Validation
+                  When admin adds sizes, the total stock across all sizes should match
+                  the Initial Stock value entered above. This ensures inventory consistency.
+                  
+                  For example:
+                  - If Initial Stock = 100 and sizes are added
+                  - Then Size S stock + Size M stock + Size L stock should = 100
+                  
+                  This validation message helps the admin ensure they're distributing
+                  the inventory correctly across sizes.
+                  */}
+                  {newProduct.sizes.length > 0 && (
+                    <div className="size-stock-info">
+                      {(() => {
+                        const totalSizeStock = newProduct.sizes.reduce(
+                          (sum, entry) => sum + (entry.stock_quantity || 0),
+                          0,
+                        );
+                        const initialStock =
+                          parseInt(newProduct.stock_quantity) || 0;
+                        const isMatching = totalSizeStock === initialStock;
+
+                        return (
+                          <div
+                            style={{
+                              padding: "10px",
+                              marginBottom: "10px",
+                              borderRadius: "4px",
+                              backgroundColor: isMatching
+                                ? "#e8f5e9"
+                                : "#fff3cd",
+                              borderLeft: `4px solid ${isMatching ? "#4caf50" : "#ff9800"}`,
+                              color: isMatching ? "#2e7d32" : "#856404",
+                            }}
+                          >
+                            <strong>
+                              Size Stock Total: {totalSizeStock} / Initial
+                              Stock: {initialStock}
+                            </strong>
+                            <br />
+                            {isMatching ? (
+                              <span>
+                                ✅ Perfect! Size stocks match initial stock.
+                              </span>
+                            ) : (
+                              <span>
+                                ⚠️ Size stocks don't match initial stock. Total
+                                should equal {initialStock}.
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                   {newProduct.sizes.map((entry, index) => (
                     <div key={index} className="size-row">
                       <input
@@ -3538,6 +3976,74 @@ const AdminDashboard = () => {
                 Confirm Restock
               </button>
               <button className="btn-secondary" onClick={closeDetailModal}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NEW CODE - Add Category Modal
+      This modal appears when the admin clicks "Add Category" button.
+      It allows the admin to input a new category name and save it to the database.
+      */}
+      {showAddCategoryModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAddCategoryModal(false)}
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "500px" }}
+          >
+            <div className="modal-header">
+              <h2>➕ Add New Category</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowAddCategoryModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddCategory();
+                }}
+              >
+                <div className="form-group">
+                  <label htmlFor="categoryName">Category Name *</label>
+                  <input
+                    id="categoryName"
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="e.g., Apparel, Electronics, Home & Garden"
+                    required
+                    disabled={addingCategory}
+                    autoFocus
+                  />
+                  <small style={{ color: "#666", marginTop: "5px" }}>
+                    Enter the name of the new product category
+                  </small>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn-primary"
+                onClick={handleAddCategory}
+                disabled={addingCategory || !newCategoryName.trim()}
+              >
+                {addingCategory ? "Adding..." : "Add Category"}
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => setShowAddCategoryModal(false)}
+                disabled={addingCategory}
+              >
                 Cancel
               </button>
             </div>
