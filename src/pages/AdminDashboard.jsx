@@ -1095,15 +1095,44 @@ const AdminDashboard = ({ user }) => {
     }
   };
 
-  const handleUpdateOrderStatus = async (orderId, newStatus) => {
-    try {
-      await updateOrderStatus(orderId, newStatus);
-      await loadDashboardData();
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      alert(`Failed to update order status: ${error.message}`);
+  // const handleUpdateOrderStatus = async (orderId, newStatus) => {
+  //   try {
+  //     await updateOrderStatus(orderId, newStatus);
+  //     await loadDashboardData();
+  //   } catch (error) {
+  //     console.error("Error updating order status:", error);
+  //     alert(`Failed to update order status: ${error.message}`);
+  //   }
+  // };
+
+const handleUpdateOrderStatus = async (orderId, newStatus) => {
+  try {
+    // If cancelling, restore stock for each item in the order
+    if (newStatus === "cancelled") {
+      const order = orders.find((o) => o.id === orderId);
+      if (order && order.items && order.items.length > 0) {
+        for (const item of order.items) {
+          const product = products.find((p) => p.id === item.productId);
+          if (product) {
+            const restoredStock = product.stock_quantity + item.quantity;
+            await updateStockMutation.mutateAsync({
+              id: product.id,
+              newStock: restoredStock,
+            });
+          }
+        }
+      }
     }
-  };
+
+    await updateOrderStatus(orderId, newStatus);
+    await loadDashboardData();
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    alert(`Failed to update order status: ${error.message}`);
+  }
+};
+
+
 
   const handleDeleteOrder = async (orderId) => {
     if (
