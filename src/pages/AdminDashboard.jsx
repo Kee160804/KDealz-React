@@ -34,7 +34,21 @@ import {
   updateOrderStatus,
   deleteOrder,
 } from "../services/orderService";
+/* OLD CODE (COMMENTED OUT): No longer needed - users will not be stored/managed
 import { getAllUsers } from "../services/userService";
+*/
+/* OLD CODE (COMMENTED OUT): Login modal moved to Header component
+// The Header component now handles admin authentication with Supabase
+// The login modal is in Header.jsx and uses signInAdmin() from userService
+// This AdminDashboard now only checks if user is authenticated before rendering
+import {
+  signInAdmin,
+  signOutAdmin,
+  isCurrentUserAdmin,
+  getCurrentSupabaseUser,
+  onAuthStateChange,
+} from "../services/userService";
+*/
 import { getAllExpenses, addExpense } from "../services/expenseService";
 import {
   getAllCategories,
@@ -51,7 +65,9 @@ import {
   deleteCategory,
 } from "../services/categoryService";
 
-const AdminDashboard = () => {
+// NEW CODE: Receive user prop from parent component (App.jsx)
+// This is needed to check if user is authenticated before showing dashboard
+const AdminDashboard = ({ user }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -83,6 +99,19 @@ const AdminDashboard = () => {
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
+
+  /* OLD CODE (COMMENTED OUT): Authentication states and login modal moved to Header component
+  The Header component now handles admin login with real Supabase authentication
+  This dashboard now relies on the parent App component to pass the authenticated user
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentAdmin, setCurrentAdmin] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  */
 
   // Product filtering states
   const [productSearchTerm, setProductSearchTerm] = useState("");
@@ -407,8 +436,13 @@ const AdminDashboard = () => {
 
   // Load initial dashboard data on mount
   useEffect(() => {
+    // NEW CODE: Simple auth check - if no user or user isn't admin, redirect
+    if (!user || user.role !== 'admin') {
+      navigate('/');
+      return;
+    }
     loadDashboardData();
-  }, []);
+  }, [user, navigate]);
 
   // Load categories and subcategories
   useEffect(() => {
@@ -501,7 +535,9 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const loadedProductsRaw = await getAllProducts();
+      /* OLD CODE (COMMENTED OUT): No longer needed - no users to load
       const loadedUsers = await getAllUsers();
+      */
       const loadedExpenses = await getAllExpenses();
       const loadedOrders = await getAllOrders();
 
@@ -509,10 +545,13 @@ const AdminDashboard = () => {
 
       setProducts(loadedProducts);
       setOrders(loadedOrders);
+      /* OLD CODE (COMMENTED OUT): No longer needed - no users to set
       setUsers(loadedUsers);
+      */
       setExpenses(loadedExpenses);
 
-      calculateStats(loadedProducts, loadedOrders, loadedUsers, loadedExpenses);
+      /* NEW CODE: Update calculateStats to not use users parameter */
+      calculateStats(loadedProducts, loadedOrders, loadedExpenses);
       processChartData(loadedOrders, loadedProducts);
       findLowStockAlerts(loadedProducts);
       getTopProducts(loadedOrders, loadedProducts);
@@ -525,7 +564,11 @@ const AdminDashboard = () => {
   };
 
   // Stats functions (unchanged logic, but using correct fields)
+  /* OLD CODE (COMMENTED OUT): Removed users parameter since we don't have user accounts
   const calculateStats = (products, orders, users, expensesList) => {
+  */
+  // NEW CODE: Updated to not require users parameter
+  const calculateStats = (products, orders, expensesList) => {
     const totalEarned = orders.reduce((sum, o) => sum + o.total, 0);
 
     const cogs = orders.reduce((sum, order) => {
@@ -559,7 +602,9 @@ const AdminDashboard = () => {
     setStats({
       totalProducts: products.length,
       totalOrders: orders.length,
+      /* OLD CODE (COMMENTED OUT): No longer needed - no users in the system
       totalUsers: users.length,
+      */
       totalRevenue: totalEarned,
       totalEarned,
       totalExpenses,
@@ -1337,6 +1382,14 @@ const AdminDashboard = () => {
         <div className="header-title">
           <h1>Admin Dashboard</h1>
           <p>Welcome back! Here's what's happening with your store today.</p>
+          {/* OLD CODE (COMMENTED OUT): Logout button and email display moved to Header component
+          The Header now shows the user's email and has the logout button
+          {currentAdmin && (
+            <p className="admin-email-display">
+              Logged in as: <strong>{currentAdmin.email}</strong>
+            </p>
+          )}
+          */}
         </div>
         <div className="header-actions">
           <button
@@ -1348,6 +1401,16 @@ const AdminDashboard = () => {
           <button className="btn-secondary" onClick={loadDashboardData}>
             🔄 Refresh Data
           </button>
+          {/* OLD CODE (COMMENTED OUT): Logout button moved to Header component
+          <button
+            className="btn-logout"
+            onClick={handleAdminLogout}
+            disabled={loginLoading}
+            title="Sign out of admin dashboard"
+          >
+            🚪 Logout
+          </button>
+          */}
         </div>
       </div>
 
@@ -1373,6 +1436,7 @@ const AdminDashboard = () => {
             </span>
           </div>
         </div>
+        {/* OLD CODE (COMMENTED OUT): Users stat card removed - no user accounts in open ordering system
         <div className="stat-card" onClick={() => openModal("users")}>
           <div className="stat-icon">👥</div>
           <div className="stat-content">
@@ -1383,6 +1447,7 @@ const AdminDashboard = () => {
             </span>
           </div>
         </div>
+        */}
         <div className="stat-card" onClick={() => openModal("revenue")}>
           <div className="stat-icon">💵</div>
           <div className="stat-content">

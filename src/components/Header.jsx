@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Cart from './Cart';
 import '../styles/Header.css';
+// NEW CODE: Import Supabase authentication functions
+import { signInAdmin, isAuthorizedAdmin } from '../services/userService';
 
 /**
  * Header Component
@@ -27,38 +29,49 @@ const Header = ({
   // Login Form State
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  // NEW CODE: Add loading state for async login
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Demo admin credentials (should be moved to env in production)
+  /* OLD CODE (COMMENTED OUT): Using mock admin credentials
   const ADMIN_CREDENTIALS = {
     email: 'admin@karibbean.com',
     password: 'admin123'
   };
+  */
 
   /**
-   * Handle login form submission
-   * Validates credentials against demo admin account
+   * NEW CODE: Handle login form submission with real Supabase authentication
+   * Uses signInAdmin from userService for real credentials
    */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
     
     try {
       const { email, password } = loginForm;
-      const isValidAdmin = email === ADMIN_CREDENTIALS.email && 
-                          password === ADMIN_CREDENTIALS.password;
+      
+      // NEW CODE: Use Supabase authentication instead of mock credentials
+      const result = await signInAdmin(email, password);
 
-      if (isValidAdmin) {
+      if (result.success) {
+        // Login successful - call parent onLogin with user data
         onLogin({
-          email,
-          role: 'admin',
-          name: 'Admin User'
+          email: result.user.email,
+          id: result.user.id,
+          role: result.user.role,
+          name: result.user.email.split('@')[0] // Use email username as name
         });
         resetLoginModal();
       } else {
-        setError('Invalid credentials');
+        // Login failed - show error from Supabase
+        setError(result.error || 'Login failed. Please try again.');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -154,6 +167,8 @@ const Header = ({
           onFormChange={setLoginForm}
           onSubmit={handleLogin}
           onClose={resetLoginModal}
+          /* NEW CODE: Pass loading state to disable inputs during login */
+          isLoading={isLoading}
         />
       )}
     </header>
@@ -275,7 +290,7 @@ const AdminLink = ({ onClose }) => (
 /**
  * Login Modal Component
  */
-const LoginModal = ({ formData, error, onFormChange, onSubmit, onClose }) => {
+const LoginModal = ({ formData, error, onFormChange, onSubmit, onClose, isLoading }) => {
   const handleChange = (e) => {
     const { id, value } = e.target;
     onFormChange(prev => ({ ...prev, [id]: value }));
@@ -284,7 +299,7 @@ const LoginModal = ({ formData, error, onFormChange, onSubmit, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="login-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="Close login modal">×</button>
+        <button className="modal-close" onClick={onClose} aria-label="Close login modal" disabled={isLoading}>×</button>
         
         <h2>Admin Login</h2>
         <p className="modal-subtitle">Access your admin dashboard</p>
@@ -296,8 +311,10 @@ const LoginModal = ({ formData, error, onFormChange, onSubmit, onClose }) => {
             label="Email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="admin@karibbean.com"
+            /* NEW CODE: Updated placeholder to use correct Supabase email with capital K */
+            placeholder="johndoe@gmail.com"
             required
+            disabled={isLoading}
           />
 
           <FormField
@@ -308,14 +325,21 @@ const LoginModal = ({ formData, error, onFormChange, onSubmit, onClose }) => {
             onChange={handleChange}
             placeholder="••••••••"
             required
+            disabled={isLoading}
           />
 
           {error && <ErrorMessage message={error} />}
 
+          {/* COMMENTED OUT: Removed demo credentials display - using LIVE Supabase authentication only
           <DemoCredentials />
+          */}
           
-          <button type="submit" className="login-submit-btn">
-            Login as Admin
+          <button 
+            type="submit" 
+            className="login-submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Logging in...' : 'Login as Admin'}
           </button>
         </form>
       </div>
@@ -326,7 +350,7 @@ const LoginModal = ({ formData, error, onFormChange, onSubmit, onClose }) => {
 /**
  * Form Field Component
  */
-const FormField = ({ id, type, label, value, onChange, placeholder, required }) => (
+const FormField = ({ id, type, label, value, onChange, placeholder, required, disabled }) => (
   <div className="form-group">
     <label htmlFor={id}>{label}</label>
     <input
@@ -336,6 +360,7 @@ const FormField = ({ id, type, label, value, onChange, placeholder, required }) 
       onChange={onChange}
       required={required}
       placeholder={placeholder}
+      disabled={disabled}
       autoComplete={type === 'password' ? 'current-password' : 'email'}
     />
   </div>
@@ -351,14 +376,17 @@ const ErrorMessage = ({ message }) => (
 );
 
 /**
- * Demo Credentials Display
- */
+ * COMMENTED OUT: DemoCredentials component removed
+ * OLD CODE: Previously displayed mock credentials
+ * NEW: Using LIVE Supabase authentication - no mock data displayed
+ 
 const DemoCredentials = () => (
   <div className="demo-credentials">
-    <p><strong>Demo Credentials:</strong></p>
-    <p>Email: admin@karibbean.com</p>
-    <p>Password: admin123</p>
+    <p><strong>Admin Login:</strong></p>
+    <p>Email: mclaughlinyan04@gmail.com</p>
+    <p>Password: Your Supabase password</p>
   </div>
 );
+*/
 
 export default Header;

@@ -213,7 +213,7 @@ function App() {
               path="/admin"
               element={
                 user?.role === "admin" ? (
-                  <AdminDashboard />
+                  <AdminDashboard user={user} />
                 ) : (
                   <div className="unauthorized">
                     <h2>Access Denied</h2>
