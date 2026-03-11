@@ -171,7 +171,10 @@ export const createOrder = async (orderData, cartItems) => {
           .single();
 
         if (fetchError) {
-          console.warn(`⚠️ Could not fetch product ${productId} for stock update:`, fetchError);
+          console.warn(
+            `⚠️ Could not fetch product ${productId} for stock update:`,
+            fetchError,
+          );
           continue;
         }
 
@@ -180,32 +183,46 @@ export const createOrder = async (orderData, cartItems) => {
         if (selectedSize && currentProduct.available_Sizes) {
           // Product has sizes - update the specific size's stock
           try {
-            const availableSizes = typeof currentProduct.available_Sizes === 'string' 
-              ? JSON.parse(currentProduct.available_Sizes) 
-              : currentProduct.available_Sizes;
-            
+            const availableSizes =
+              typeof currentProduct.available_Sizes === "string"
+                ? JSON.parse(currentProduct.available_Sizes)
+                : currentProduct.available_Sizes;
+
             const currentSizeStock = availableSizes[selectedSize] || 0;
-            const newSizeStock = Math.max(0, currentSizeStock - quantityOrdered);
-            
+            const newSizeStock = Math.max(
+              0,
+              currentSizeStock - quantityOrdered,
+            );
+
             updatedStock = {
               ...availableSizes,
               [selectedSize]: newSizeStock,
             };
           } catch (parseError) {
-            console.warn(`⚠️ Error parsing available_Sizes for product ${productId}:`, parseError);
+            console.warn(
+              `⚠️ Error parsing available_Sizes for product ${productId}:`,
+              parseError,
+            );
             updatedStock = currentProduct.available_Sizes;
           }
         }
 
         // Update the product stock in the database
-        const updatePayload = selectedSize && Object.keys(updatedStock).length > 0
-          ? {
-              available_Sizes: JSON.stringify(updatedStock),
-              stock_quantity: Math.max(0, (currentProduct.stock_quantity || 0) - quantityOrdered),
-            }
-          : {
-              stock_quantity: Math.max(0, (currentProduct.stock_quantity || 0) - quantityOrdered),
-            };
+        const updatePayload =
+          selectedSize && Object.keys(updatedStock).length > 0
+            ? {
+                available_Sizes: JSON.stringify(updatedStock),
+                stock_quantity: Math.max(
+                  0,
+                  (currentProduct.stock_quantity || 0) - quantityOrdered,
+                ),
+              }
+            : {
+                stock_quantity: Math.max(
+                  0,
+                  (currentProduct.stock_quantity || 0) - quantityOrdered,
+                ),
+              };
 
         const { error: updateError } = await supabase
           .from("products")
@@ -213,15 +230,22 @@ export const createOrder = async (orderData, cartItems) => {
           .eq("id", productId);
 
         if (updateError) {
-          console.warn(`⚠️ Failed to update stock for product ${productId}:`, updateError);
+          console.warn(
+            `⚠️ Failed to update stock for product ${productId}:`,
+            updateError,
+          );
         } else {
-          console.log(`✅ Stock reduced for product ${productId}: ${quantityOrdered} units removed`);
+          console.log(
+            `✅ Stock reduced for product ${productId}: ${quantityOrdered} units removed`,
+          );
         }
       }
     } catch (stockError) {
       console.error("Error reducing stock after order creation:", stockError);
       // Don't throw here - order was successfully created, just log the warning
-      console.warn("Order created successfully but stock reduction encountered an error");
+      console.warn(
+        "Order created successfully but stock reduction encountered an error",
+      );
     }
 
     // Return complete order with items
@@ -251,7 +275,7 @@ export const getAllOrders = async () => {
     // Fetch all order items
     const orders = data || [];
     console.log(`📦 Fetched ${orders.length} orders from database`);
-    
+
     const enrichedOrders = await Promise.all(
       orders.map(async (order) => {
         const { data: itemsData, error: itemsError } = await supabase
@@ -260,10 +284,15 @@ export const getAllOrders = async () => {
           .eq("order_id", order.id);
 
         if (itemsError) {
-          console.warn(`⚠️ Error fetching items for order ${order.id}:`, itemsError);
+          console.warn(
+            `⚠️ Error fetching items for order ${order.id}:`,
+            itemsError,
+          );
         }
-        
-        console.log(`📋 Order ${order.id}: Found ${itemsData?.length || 0} items`);
+
+        console.log(
+          `📋 Order ${order.id}: Found ${itemsData?.length || 0} items`,
+        );
 
         // Fetch product details for each item to display name, size, etc.
         const enrichedItems = await Promise.all(
@@ -276,9 +305,14 @@ export const getAllOrders = async () => {
                 .single();
 
               if (productError) {
-                console.warn(`⚠️ Product ${item.product_id} not found:`, productError);
+                console.warn(
+                  `⚠️ Product ${item.product_id} not found:`,
+                  productError,
+                );
               } else {
-                console.log(`✅ Found product: ${product?.name} (ID: ${item.product_id})`);
+                console.log(
+                  `✅ Found product: ${product?.name} (ID: ${item.product_id})`,
+                );
               }
 
               return {
@@ -307,7 +341,7 @@ export const getAllOrders = async () => {
 
         // Ensure items is always an array
         const itemsArray = Array.isArray(enrichedItems) ? enrichedItems : [];
-        
+
         const enrichedOrder = {
           ...transformOrder(order),
           items: itemsArray,
@@ -324,13 +358,18 @@ export const getAllOrders = async () => {
               : order.payment_method,
           shippingAddress: `${order.shipping_address}, ${order.shipping_city}, ${order.shipping_zip_code}`,
         };
-        
-        console.log(`✅ Order ${order.id} enriched with ${itemsArray.length} items`, { items: itemsArray, order: enrichedOrder });
+
+        console.log(
+          `✅ Order ${order.id} enriched with ${itemsArray.length} items`,
+          { items: itemsArray, order: enrichedOrder },
+        );
         return enrichedOrder;
       }),
     );
 
-    console.log(`✅ All orders enriched. Total: ${enrichedOrders.length} orders`);
+    console.log(
+      `✅ All orders enriched. Total: ${enrichedOrders.length} orders`,
+    );
     return enrichedOrders;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -361,9 +400,54 @@ export const getOrderById = async (orderId) => {
 
     if (itemsError) console.warn("Error fetching order items:", itemsError);
 
+    // Enrich items with product names and details
+    const enrichedItems = await Promise.all(
+      (itemsData || []).map(async (item) => {
+        try {
+          const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("name, price, sizes, available_Sizes")
+            .eq("id", item.product_id)
+            .single();
+
+          if (productError) {
+            console.warn(
+              `⚠️ Product ${item.product_id} not found:`,
+              productError,
+            );
+          } else {
+            console.log(
+              `✅ Found product: ${product?.name} (ID: ${item.product_id})`,
+            );
+          }
+
+          return {
+            ...item,
+            name: product?.name || "Unknown Product",
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price ? parseFloat(item.price) : 0,
+            subtotal: item.subtotal ? parseFloat(item.subtotal) : 0,
+            size: item.size || null,
+          };
+        } catch (err) {
+          console.error(`❌ Error enriching item ${item.product_id}:`, err);
+          return {
+            ...item,
+            name: "Unknown Product",
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price ? parseFloat(item.price) : 0,
+            subtotal: item.subtotal ? parseFloat(item.subtotal) : 0,
+            size: item.size || null,
+          };
+        }
+      }),
+    );
+
     return {
       ...transformOrder(orderData),
-      items: itemsData || [],
+      items: enrichedItems,
     };
   } catch (error) {
     console.error("Error fetching order:", error);
@@ -424,7 +508,12 @@ export const updateOrderStatus = async (orderId, newStatus) => {
  */
 export const updatePaymentStatus = async (orderId, paymentStatus) => {
   try {
-    const validStatuses = ["pending_confirmation", "completed", "failed", "refunded"];
+    const validStatuses = [
+      "pending_confirmation",
+      "completed",
+      "failed",
+      "refunded",
+    ];
 
     if (!validStatuses.includes(paymentStatus)) {
       throw new Error(
@@ -473,6 +562,149 @@ export const markWhatsAppSent = async (orderId, conversationId = null) => {
     return transformOrder(data);
   } catch (error) {
     console.error("Error marking WhatsApp sent:", error);
+    throw error;
+  }
+};
+
+/**
+ * Cancel an order and restore stock for all items
+ * When an order is cancelled, all product stock quantities are restored
+ * to their previous counts before the order was placed.
+ *
+ * @param {number} orderId - The order ID to cancel
+ * @returns {Promise<Object>} - Updated cancelled order
+ * @throws {Error} - If cancellation fails
+ */
+export const cancelOrder = async (orderId) => {
+  try {
+    console.log(`🔄 Attempting to cancel order ${orderId}...`);
+
+    // Fetch the order and its items
+    const { data: orderData, error: orderError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single();
+
+    if (orderError) throw orderError;
+    if (!orderData) throw new Error("Order not found");
+
+    // Check if order is already cancelled
+    if (orderData.order_status === "cancelled") {
+      throw new Error("Order is already cancelled");
+    }
+
+    // Fetch all order items
+    const { data: itemsData, error: itemsError } = await supabase
+      .from("order_item")
+      .select("*")
+      .eq("order_id", orderId);
+
+    if (itemsError) throw itemsError;
+
+    // Restore stock for each item in the order
+    console.log(`📦 Restoring stock for ${itemsData?.length || 0} items...`);
+
+    try {
+      for (const item of itemsData || []) {
+        const productId = item.product_id;
+        const quantityToRestore = item.quantity;
+        const selectedSize = item.size;
+
+        // Fetch current product to get its stock info
+        const { data: currentProduct, error: fetchError } = await supabase
+          .from("products")
+          .select("stock_quantity, available_Sizes, sizes")
+          .eq("id", productId)
+          .single();
+
+        if (fetchError) {
+          console.warn(
+            `⚠️ Could not fetch product ${productId} for stock restoration:`,
+            fetchError,
+          );
+          continue;
+        }
+
+        let updatedStock = {};
+
+        if (selectedSize && currentProduct.available_Sizes) {
+          // Product has sizes - restore the specific size's stock
+          try {
+            const availableSizes =
+              typeof currentProduct.available_Sizes === "string"
+                ? JSON.parse(currentProduct.available_Sizes)
+                : currentProduct.available_Sizes;
+
+            const currentSizeStock = availableSizes[selectedSize] || 0;
+            const newSizeStock = currentSizeStock + quantityToRestore;
+
+            updatedStock = {
+              ...availableSizes,
+              [selectedSize]: newSizeStock,
+            };
+          } catch (parseError) {
+            console.warn(
+              `⚠️ Error parsing available_Sizes for product ${productId}:`,
+              parseError,
+            );
+            updatedStock = currentProduct.available_Sizes;
+          }
+        }
+
+        // Update the product stock in the database
+        const updatePayload =
+          selectedSize && Object.keys(updatedStock).length > 0
+            ? {
+                available_Sizes: JSON.stringify(updatedStock),
+                stock_quantity:
+                  (currentProduct.stock_quantity || 0) + quantityToRestore,
+              }
+            : {
+                stock_quantity:
+                  (currentProduct.stock_quantity || 0) + quantityToRestore,
+              };
+
+        const { error: updateError } = await supabase
+          .from("products")
+          .update(updatePayload)
+          .eq("id", productId);
+
+        if (updateError) {
+          console.warn(
+            `⚠️ Failed to restore stock for product ${productId}:`,
+            updateError,
+          );
+        } else {
+          console.log(
+            `✅ Stock restored for product ${productId}: +${quantityToRestore} units`,
+          );
+        }
+      }
+    } catch (stockError) {
+      console.error("Error restoring stock:", stockError);
+      throw new Error(`Failed to restore stock: ${stockError.message}`);
+    }
+
+    // Update order status to cancelled
+    const { data: updatedOrder, error: cancelError } = await supabase
+      .from("orders")
+      .update({
+        order_status: "cancelled",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", orderId)
+      .select()
+      .single();
+
+    if (cancelError) throw cancelError;
+
+    console.log(
+      `✅ Order ${orderId} cancelled successfully and stock restored`,
+    );
+    return transformOrder(updatedOrder);
+  } catch (error) {
+    console.error("Error cancelling order:", error);
     throw error;
   }
 };

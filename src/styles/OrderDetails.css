@@ -450,6 +450,23 @@
   transform: translateY(-2px);
 }
 
+.btn-danger {
+  background: #f44336;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ─── Responsive Design ──────────────────────────────────────────────── */
 
 @media (max-width: 768px) {

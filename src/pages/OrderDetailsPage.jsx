@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getOrderById, updateOrderStatus } from "../services/orderService";
+import {
+  getOrderById,
+  updateOrderStatus,
+  cancelOrder,
+} from "../services/orderService";
 import "../styles/OrderDetails.css";
 
 /**
@@ -56,6 +60,29 @@ const OrderDetailsPage = () => {
     } catch (err) {
       console.error("Error updating status:", err);
       alert(`❌ Failed to update order status: ${err.message}`);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    // Confirm before cancelling
+    const confirmed = window.confirm(
+      "⚠️ Are you sure you want to cancel this order? Stock will be restored automatically.",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setUpdating(true);
+      const updatedOrder = await cancelOrder(parseInt(orderId));
+      setOrder(updatedOrder);
+      alert(
+        "✅ Order cancelled successfully! Stock has been restored for all items.",
+      );
+    } catch (err) {
+      console.error("Error cancelling order:", err);
+      alert(`❌ Failed to cancel order: ${err.message}`);
     } finally {
       setUpdating(false);
     }
@@ -292,6 +319,15 @@ const OrderDetailsPage = () => {
           <button onClick={handlePrint} className="btn btn-primary">
             🖨️ Print Order
           </button>
+          {order.order_status !== "cancelled" && (
+            <button
+              onClick={handleCancel}
+              className="btn btn-danger"
+              disabled={updating}
+            >
+              ❌ Cancel Order
+            </button>
+          )}
         </div>
       </div>
     </div>

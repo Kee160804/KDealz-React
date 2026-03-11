@@ -1988,6 +1988,7 @@ const AdminDashboard = ({ user }) => {
                     className="category-select"
                   >
                     <option value="all">All Statuses</option>
+                    <option value="cancelled">❌ Cancelled</option>
                     <option value="pending_confirmation">
                       ⏳ Pending Confirmation
                     </option>
@@ -2772,6 +2773,7 @@ const AdminDashboard = ({ user }) => {
                               }}
                               className="status-select"
                             >
+                              <option value="cancelled">Cancelled</option>
                               <option value="pending_confirmation">
                                 Pending Confirmation
                               </option>
@@ -3246,6 +3248,7 @@ const AdminDashboard = ({ user }) => {
                   }}
                   className="status-select"
                 >
+                  <option value="cancelled">❌ Cancelled</option>
                   <option value="pending_confirmation">
                     ⏳ Pending Confirmation
                   </option>
