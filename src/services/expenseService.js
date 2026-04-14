@@ -16,10 +16,9 @@ export const generateDemoExpenses = (products) => {
 };
 
 // Initialize expenses
-export const initializeExpenses = () => {
+export const initializeExpenses = async () => {
   const storedExpenses = localStorage.getItem('expenses');
-  const products = getAllProducts();
-  
+  const products = await getAllProducts();
   if (!storedExpenses) {
     const expenses = generateDemoExpenses(products);
     localStorage.setItem('expenses', JSON.stringify(expenses));
