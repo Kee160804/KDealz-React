@@ -1543,13 +1543,16 @@
     padding: 0 15px;
     width: 100%;
     max-width: 100%;
+    display: block;
   }
 
   /* Show mobile header, hide desktop header */
   .mobile-dashboard-header {
     display: flex !important;
+    visibility: visible !important;
   }
-  .desktop-only {
+
+  .dashboard-header.desktop-only {
     display: none !important;
   }
 
@@ -1572,22 +1575,43 @@
     left: 0;
   }
 
-  /* FIXED: Add backdrop for mobile menu */
-  .mobile-nav-menu::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-    pointer-events: auto;
+  /* REMOVED: Backdrop that was causing dark overlay - use a separate overlay div instead */
+
+  /* FIXED: Ensure all content is visible */
+  .stats-grid,
+  .charts-grid,
+  .alerts-grid,
+  .action-buttons-grid,
+  .recent-orders-section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .stats-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+
+  .charts-grid {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .alerts-grid {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .recent-orders-section {
+    display: block !important;
+    overflow-x: auto;
   }
 
   .stat-card {
