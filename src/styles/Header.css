@@ -68,9 +68,10 @@
   padding: 5px;
   min-width: 44px;
   min-height: 44px;
-  display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1001;
+  position: relative;
 }
 
 /* ========== NAVIGATION LINKS ========== */
@@ -105,7 +106,8 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  /* COMMENTED OUT - Browser compatibility: scrollbar-width: none; */
+  /* -webkit-overflow-scrolling: touch; */
   -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
   padding-bottom: 2px; /* Space for potential scrollbar */
 }
@@ -137,7 +139,9 @@
   transform: translateY(-2px);
 }
 
-.cart-icon { font-size: 1.2rem; }
+.cart-icon {
+  font-size: 1.2rem;
+}
 
 .cart-count {
   background: var(--header-text);
@@ -189,7 +193,9 @@
   transform: translateY(-2px);
 }
 
-.login-icon { font-size: 1.2rem; }
+.login-icon {
+  font-size: 1.2rem;
+}
 
 /* User Menu (Logged In) */
 .user-menu {
@@ -276,8 +282,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .login-modal {
@@ -292,8 +302,14 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-close {
@@ -391,6 +407,29 @@
   color: #e67e22;
 }
 
+/* NEW CODE: Mobile Menu Backdrop - Closes menu when clicked */
+.nav-links::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 998;
+  pointer-events: none;
+}
+
+.nav-links.active::before {
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 /* Login Submit Button */
 .login-submit-btn {
   background: linear-gradient(135deg, #3498db, #2980b9);
@@ -419,116 +458,141 @@
   .menu-toggle {
     display: flex;
   }
-  
-  /* Navigation Links - Still slide down but header stays same */
+
+  /* Navigation Links - Mobile menu dropdown */
   .nav-links {
     position: fixed;
     top: 70px;
     left: 0;
     right: 0;
+    width: 100%;
     background: var(--header-bg);
     flex-direction: column;
-    padding: 20px;
-    transform: translateY(-100%);
+    display: flex;
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transition: all var(--transition);
-    box-shadow: var(--shadow);
-    z-index: 999;
+    transition:
+      max-height 0.3s ease,
+      opacity 0.3s ease,
+      visibility 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border: none;
   }
-  
+
+  /* FIXED: Active state for mobile menu - fully visible */
   .nav-links.active {
-    transform: translateY(0);
+    max-height: 500px;
     opacity: 1;
     visibility: visible;
+    overflow-y: auto;
   }
-  
+
   .nav-links a {
     width: 100%;
     text-align: center;
-    padding: 12px;
+    padding: 12px 16px;
+    color: var(--header-text);
+    font-size: 1rem;
+    font-weight: 500;
+    display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
   }
-  
+
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  .nav-links a:active,
+  .nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
   .navbar {
     padding: 0 12px;
   }
-  
+
   /* ADMIN LINK - ALWAYS VISIBLE AND FIXED IN HEADER */
   .admin-link-container {
     display: inline-block;
     flex-shrink: 0;
   }
-  
+
   .admin-link {
     padding: 6px 8px;
     font-size: 0.75rem;
     min-height: 36px;
     max-width: 110px; /* Slightly smaller on mobile */
   }
-  
+
   /* Header Actions - Allow horizontal scroll if needed */
   .header-actions {
     gap: 0.3rem;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    /* COMMENTED OUT - Browser compatibility: -webkit-overflow-scrolling: touch; */
   }
-  
+
   /* Cart button - slightly smaller but same shape */
   .cart-btn {
     padding: 6px 8px;
     min-height: 36px;
   }
-  
+
   .cart-total-mini {
     display: none; /* Hide total text but keep button shape */
   }
-  
+
   .cart-count {
     padding: 1px 5px;
     font-size: 0.75rem;
   }
-  
+
   /* Login button - same shape, slightly smaller */
   .login-btn {
     padding: 6px 8px;
     min-height: 36px;
   }
-  
+
   .login-text {
     display: none; /* Hide text but keep icon and button shape */
   }
-  
+
   .login-icon {
     font-size: 1.1rem;
     margin: 0;
   }
-  
+
   /* User menu when logged in */
   .user-menu {
     padding: 4px 8px;
     min-height: 36px;
   }
-  
+
   .user-greeting {
     display: none; /* Hide greeting but keep menu shape */
   }
-  
+
   .logout-btn {
     padding: 3px 6px;
     font-size: 0.7rem;
   }
-  
+
   /* Logo - adjust size but keep shape */
   .logo a {
     font-size: 1.4rem;
     gap: 5px;
   }
-  
+
   /* Modal adjustments */
   .login-modal {
     padding: 1.5rem;
   }
-  
+
   .login-modal h2 {
     font-size: 1.4rem;
   }
@@ -539,11 +603,11 @@
   .navbar {
     padding: 0 8px;
   }
-  
+
   .logo a {
     font-size: 1.2rem;
   }
-  
+
   /* Keep all buttons same shape, just slightly smaller */
   .cart-btn,
   .login-btn,
@@ -552,31 +616,31 @@
     min-height: 34px;
     font-size: 0.7rem;
   }
-  
+
   .admin-link {
     padding: 5px 8px;
     max-width: 100px; /* Even smaller on very small screens */
   }
-  
+
   .cart-icon,
   .login-icon {
     font-size: 1rem;
   }
-  
+
   .user-menu {
     padding: 3px 6px;
     min-height: 34px;
   }
-  
+
   .logout-btn {
     padding: 2px 5px;
     font-size: 0.65rem;
   }
-  
+
   .login-modal {
     padding: 1.2rem;
   }
-  
+
   .demo-credentials {
     font-size: 0.75rem;
     padding: 0.6rem;
@@ -588,7 +652,7 @@
   .logo a {
     font-size: 1rem;
   }
-  
+
   .cart-btn,
   .login-btn,
   .admin-link {
@@ -596,11 +660,11 @@
     min-height: 32px;
     font-size: 0.65rem;
   }
-  
+
   .admin-link {
     max-width: 90px; /* Minimum size to prevent overflow */
   }
-  
+
   .cart-icon,
   .login-icon {
     font-size: 0.9rem;
@@ -617,4 +681,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-

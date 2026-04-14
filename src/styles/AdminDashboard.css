@@ -764,8 +764,8 @@
   animation: slideUp 0.3s ease;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   pointer-events: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) #f0f0f0;
+  /* COMMENTED OUT - Browser compatibility: scrollbar-width: thin; */
+  /* COMMENTED OUT - Browser compatibility: scrollbar-color: var(--primary-color) #f0f0f0; */
 }
 
 .modal-content::-webkit-scrollbar {
@@ -2036,7 +2036,7 @@
 
   .modal-table-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    /* COMMENTED OUT - Browser compatibility: -webkit-overflow-scrolling: touch; */
   }
 
   /* Buttons in modal */
@@ -2055,7 +2055,7 @@
   /* Orders table */
   .orders-table-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    /* COMMENTED OUT - Browser compatibility: -webkit-overflow-scrolling: touch; */
     font-size: 0.8rem;
   }
 
