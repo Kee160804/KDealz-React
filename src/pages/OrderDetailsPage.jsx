@@ -421,6 +421,7 @@ const formatPaymentMethod = (method) => {
   return methods[method] || method;
 };
 
+
 /**
  * Format status label
  */
